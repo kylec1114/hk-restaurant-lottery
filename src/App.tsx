@@ -311,15 +311,15 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 p-8 pointer-events-none">
         <div className="max-w-md mx-auto bg-slate-900/80 backdrop-blur-3xl border border-slate-800/50 rounded-[2.5rem] flex justify-around items-center p-3 shadow-2xl shadow-black pointer-events-auto">
           <button onClick={() => setActiveTab('lottery')} className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'lottery' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
-            <span className="texttext-2xl3xl">🎰</span>
+            <span className="text-xl">🎰</span>
             <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('lottery')}</span>
           </button>
           <button onClick={() => setActiveTab('favorites')} className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'favorites' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
-            <span className="texttext-2xl3xl">❤️</span>
+            <span className="text-xl">❤️</span>
             <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('favorites')}</span>
           </button>
           <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'settings' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
-            <span className="texttext-2xl3xl">⚙️</span>
+            <span className="text-xl">⚙️</span>
             <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('settings')}</span>
           </button>
         </div>
