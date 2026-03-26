@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 
 // --- Utilities & Constants ---
-
 const CUISINES = [
   { id: 'all', name: '隨便', icon: '🍱' },
   { id: 'cha-chaan-teng', name: '茶餐廳', icon: '☕' },
@@ -71,30 +70,18 @@ const TRANSLATIONS: any = {
 };
 
 // --- Components ---
-
-const RestaurantCard = ({ 
-  res, 
-  isMain = false, 
-  favorites = [], 
-  onToggleFavorite, 
-  onShare, 
-  reviews = [], 
-  onAddReview,
-  t,
-  lang
-}: any) => {
+const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite, onShare, reviews = [], onAddReview, t }: any) => {
   const [newReview, setNewReview] = useState('');
-  
   if (!res) return null;
-
   const isFavorite = favorites.some((f: any) => f.name === res.name);
 
   return (
-    <div className={`w-full max-w-sm rounded-3xl p-6 bg-slate-800/80 backdrop-blur-md border ${isMain ? 'border-blue-500 shadow-xl shadow-blue-500/20' : 'border-slate-700'} mt-4 mx-auto`}>
+    <div className={`bg-slate-800/50 backdrop-blur-md rounded-3xl p-6 border border-slate-700/50 ${isMain ? 'mb-8 ring-2 ring-blue-500/50' : 'mb-4'}`}>
       <div className="flex justify-between items-start mb-4">
-        <h2 className={`font-black tracking-tight ${isMain ? 'text-2xl text-white' : 'text-lg text-slate-200'}`}>
-          {res.name || '未命名餐廳'}
-        </h2>
+        <div>
+          <h2 className="text-xl font-bold text-white mb-1">{res.name || '未命名餐廳'}</h2>
+          <p className="text-slate-400 text-sm">📍 {res.address || '地址未提供'}</p>
+        </div>
         <button 
           onClick={() => onToggleFavorite(res)}
           className="text-2xl p-2 rounded-full bg-slate-700/50 hover:bg-slate-600 transition-colors"
@@ -102,28 +89,26 @@ const RestaurantCard = ({
           {isFavorite ? '❤️' : '🤍'}
         </button>
       </div>
-      
-      <p className="text-slate-400 text-sm mb-4">📍 {res.address || '地址未提供'}</p>
-      
-      <div className="flex gap-2 mb-6 text-xs font-bold uppercase">
-        <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30">🟢 {t('openNow')}</span>
-        <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full border border-orange-500/30">⭐ {res.rating || '4.2'}</span>
+
+      <div className="flex gap-4 mb-6">
+        <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold">🟢 {t('openNow')}</span>
+        <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs font-bold">⭐ {res.rating || '4.2'}</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-6">
         <a 
-          href={res.openriceUrl || '#'} 
+          href={res.openriceUrl} 
           target="_blank" 
-          rel="noreferrer"
-          className="flex items-center justify-center gap-2 bg-[#ffb300] hover:bg-[#ffa000] text-black py-3 rounded-2xl font-bold transition-all active:scale-95"
+          rel="noopener noreferrer"
+          className="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-center text-sm font-bold transition-all"
         >
           🥡 {t('openrice')}
         </a>
         <a 
-          href={res.gmapsUrl || '#'} 
+          href={res.gmapsUrl} 
           target="_blank" 
-          rel="noreferrer"
-          className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-2xl font-bold transition-all active:scale-95"
+          rel="noopener noreferrer"
+          className="bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-center text-sm font-bold transition-all"
         >
           🗺️ {t('gmaps')}
         </a>
@@ -138,26 +123,33 @@ const RestaurantCard = ({
             {t('share')}
           </button>
 
-          <div className="border-t border-slate-700 pt-6">
-            <h3 className="text-white font-bold mb-3">{t('reviews')}</h3>
+          <div className="border-t border-slate-700/50 pt-6">
+            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <span>{t('reviews')}</span>
+              <span className="text-xs bg-slate-700 px-2 py-0.5 rounded-full text-slate-400 font-normal">
+                {reviews.filter((r: any) => r.restaurantName === res.name).length}
+              </span>
+            </h3>
+            
             <div className="space-y-3 mb-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
               {reviews.filter((r: any) => r.restaurantName === res.name).length === 0 ? (
-                <p className="text-slate-500 text-xs italic">仲未有評論...</p>
+                <p className="text-slate-500 text-sm italic py-2 text-center">仲未有評論...</p>
               ) : (
                 reviews.filter((r: any) => r.restaurantName === res.name).map((r: any) => (
-                  <div key={r.id} className="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
-                    <p className="text-slate-300 text-sm">{r.content}</p>
-                    <span className="text-slate-500 text-[10px] mt-1 block">{r.date}</span>
+                  <div key={r.id} className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                    <p className="text-slate-200 text-sm leading-relaxed">{r.content}</p>
+                    <p className="text-slate-500 text-[10px] mt-1">{r.date}</p>
                   </div>
                 ))
               )}
             </div>
+
             <div className="flex gap-2">
               <input 
                 value={newReview}
                 onChange={(e) => setNewReview(e.target.value)}
                 placeholder={t('writeReview')}
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
               />
               <button 
                 onClick={() => {
@@ -166,7 +158,7 @@ const RestaurantCard = ({
                     setNewReview('');
                   }
                 }}
-                className="bg-blue-500 hover:bg-blue-400 text-white p-2 rounded-xl transition-colors"
+                className="bg-blue-500 hover:bg-blue-400 text-white p-2 px-3 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
               >
                 🚀
               </button>
@@ -179,20 +171,17 @@ const RestaurantCard = ({
 };
 
 // --- Main Application ---
-
 export default function App() {
   const [activeTab, setActiveTab] = useState('lottery');
   const [lang, setLang] = useState('zh');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  
   const [favorites, setFavorites] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('favorites');
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
-  
   const [userReviews, setUserReviews] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('userReviews');
@@ -204,11 +193,10 @@ export default function App() {
   const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [distance, setDistance] = useState(800);
   const [minRating, setMinRating] = useState(0);
-  const [price, setPrice] = useState('any');
   const [openNow, setOpenNow] = useState(true);
   const [isCuisineExpanded, setIsCuisineExpanded] = useState(false);
 
-  // Animation
+  // Animation text
   const [slotText, setSlotText] = useState('');
   const slotOptions = ['抽緊...', '搵緊好嘢食...', '睇吓附近有咩...', '即將揭曉...', '諗緊食乜...'];
 
@@ -248,18 +236,24 @@ export default function App() {
           radius: distance.toString(),
           category: selectedCuisine,
           min_rating: minRating.toString(),
-          price: price,
           open_now: openNow.toString()
         });
 
-        const response = await fetch(`/api/lucky-restaurant?${params.toString()}`);
-        const data = await response.json();
-
-        setTimeout(() => {
+        try {
+          const response = await fetch(`/api/lucky-restaurant?${params.toString()}`);
+          const data = await response.json();
+          
+          setTimeout(() => {
+            clearInterval(interval);
+            setResult(data);
+            setLoading(false);
+          }, 1200);
+        } catch (err) {
+          console.error(err);
           clearInterval(interval);
-          setResult(data);
           setLoading(false);
-        }, 1200);
+          alert('API 請求失敗');
+        }
       }, (err) => {
         console.error(err);
         clearInterval(interval);
@@ -285,7 +279,11 @@ export default function App() {
   const shareCard = (res: any) => {
     const text = `我抽到呢間餐廳：${res.name}！📍 地址：${res.address}。一齊去食？`;
     if (navigator.share) {
-      navigator.share({ title: '搵食盲盒分享', text, url: window.location.href }).catch(console.error);
+      navigator.share({
+        title: '搵食盲盒分享',
+        text,
+        url: window.location.href
+      }).catch(console.error);
     } else {
       navigator.clipboard.writeText(text);
       alert('已複製分享文字！');
@@ -305,68 +303,77 @@ export default function App() {
   const displayedCuisines = isCuisineExpanded ? CUISINES : CUISINES.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans pb-24 overflow-x-hidden">
-      <div className="max-w-md mx-auto px-6 py-8">
-        
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500/30">
+      <main className="flex-1 max-w-md mx-auto w-full px-5 pt-8 pb-32">
         {/* Header */}
-        <header className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent italic flex items-center gap-2">
             {t('title')}
           </h1>
-        </header>
+        </div>
 
         {activeTab === 'lottery' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Filters */}
-            <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-6 border border-slate-800 mb-8 shadow-inner">
-              <div className="flex justify-between items-center mb-6 px-1">
-                <h3 className="font-bold text-slate-300">{t('cuisine')}</h3>
+            <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-[2.5rem] p-8 mb-8 shadow-2xl shadow-blue-900/10">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-slate-200 font-bold flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                  {t('cuisine')}
+                </h3>
                 <button 
                   onClick={() => setIsCuisineExpanded(!isCuisineExpanded)}
-                  className="text-blue-400 text-xs font-bold hover:text-blue-300"
+                  className="text-blue-400 text-xs font-bold hover:text-blue-300 transition-colors bg-blue-500/10 px-3 py-1 rounded-full"
                 >
                   {isCuisineExpanded ? '摺埋' : '全部'}
                 </button>
               </div>
-
-              <div className="grid grid-cols-3 gap-3 mb-8">
+              
+              <div className="grid grid-cols-3 gap-3 mb-10">
                 {displayedCuisines.map(c => (
                   <button
                     key={c.id}
                     onClick={() => setSelectedCuisine(c.id)}
-                    className={`flex flex-col items-center p-2 rounded-xl border transition-all active:scale-95 ${
+                    className={`flex flex-col items-center p-3 rounded-2xl border transition-all duration-300 active:scale-90 ${
                       selectedCuisine === c.id 
-                        ? 'bg-blue-500/20 border-blue-500 text-blue-100 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
-                        : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                        ? 'bg-blue-500/20 border-blue-500 text-blue-100 shadow-[0_0_20px_rgba(59,130,246,0.2)]' 
+                        : 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:bg-slate-800/60'
                     }`}
                   >
                     <span className="text-2xl mb-1">{c.icon}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{c.name}</span>
+                    <span className="text-[10px] font-bold tracking-tight">{c.name}</span>
                   </button>
                 ))}
               </div>
 
-              <div className="space-y-6 px-1">
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between text-sm font-bold text-slate-400">
-                    <span>{t('distance')}</span>
-                    <span>{distance}m</span>
+              <div className="space-y-8">
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center px-1">
+                    <span className="text-slate-200 text-sm font-bold flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                      {t('distance')}
+                    </span>
+                    <span className="text-blue-400 font-mono font-bold text-sm bg-blue-500/10 px-2 py-0.5 rounded-md">{distance}m</span>
                   </div>
                   <input 
-                    type="range" min="200" max="2000" step="100"
+                    type="range" 
+                    min="200" max="2000" step="100"
                     value={distance}
                     onChange={(e) => setDistance(parseInt(e.target.value))}
-                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
                   />
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-400">{t('openNow')}</span>
+
+                <div className="flex justify-between items-center p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30">
+                  <span className="text-slate-200 text-sm font-bold flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    {t('openNow')}
+                  </span>
                   <button 
                     onClick={() => setOpenNow(!openNow)}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${openNow ? 'bg-blue-500' : 'bg-slate-700'}`}
+                    className={`w-12 h-6 rounded-full transition-all duration-300 relative ${openNow ? 'bg-blue-500 shadow-lg shadow-blue-500/20' : 'bg-slate-700'}`}
                   >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${openNow ? 'right-1' : 'left-1'}`} />
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${openNow ? 'left-7' : 'left-1'}`}></div>
                   </button>
                 </div>
               </div>
@@ -376,23 +383,31 @@ export default function App() {
             <button 
               onClick={handleLottery}
               disabled={loading}
-              className={`w-full py-6 rounded-[2rem] font-black text-xl transition-all active:scale-[0.98] shadow-2xl ${
+              className={`w-full group relative overflow-hidden h-20 rounded-[2rem] font-black text-xl transition-all duration-500 active:scale-95 shadow-2xl ${
                 loading 
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
-                : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-blue-900/20 hover:shadow-blue-500/40'
+                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
+                  : 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-blue-900/40 hover:shadow-blue-500/30 hover:-translate-y-1'
               }`}
             >
-              {loading ? (
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{slotText}</span>
-                </div>
-              ) : t('draw')}
+              <div className="relative z-10 flex items-center justify-center gap-3">
+                {loading ? (
+                  <>
+                    <div className="w-6 h-6 border-4 border-slate-600 border-t-blue-400 rounded-full animate-spin"></div>
+                    <span className="italic">{slotText}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl group-hover:scale-125 transition-transform duration-300">🎯</span>
+                    {t('draw')}
+                  </>
+                )}
+              </div>
+              {!loading && <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>}
             </button>
 
             {/* Result */}
             {result && (
-              <div className="mt-8 animate-in zoom-in-95 duration-500">
+              <div className="mt-12 space-y-6 animate-in fade-in slide-in-from-top-4 duration-700">
                 {result.main && (
                   <RestaurantCard 
                     res={result.main} 
@@ -403,28 +418,28 @@ export default function App() {
                     reviews={userReviews}
                     onAddReview={addReview}
                     t={t}
-                    lang={lang}
                   />
                 )}
-                
+
                 {result.alternatives && result.alternatives.length > 0 && (
-                  <div className="mt-12 mb-8">
-                    <h3 className="text-xl font-black text-slate-300 px-2 mb-2">{t('alternatives')}</h3>
-                    <div className="space-y-4">
-                      {result.alternatives.map((alt: any, idx: number) => (
-                        <RestaurantCard 
-                          key={idx} 
-                          res={alt} 
-                          favorites={favorites}
-                          onToggleFavorite={toggleFavorite}
-                          onShare={shareCard}
-                          reviews={userReviews}
-                          onAddReview={addReview}
-                          t={t}
-                          lang={lang}
-                        />
-                      ))}
-                    </div>
+                  <div className="pt-4">
+                    <h3 className="text-slate-400 font-bold text-sm mb-4 px-2 flex items-center gap-2">
+                      <span className="w-8 h-[1px] bg-slate-800"></span>
+                      {t('alternatives')}
+                      <span className="flex-1 h-[1px] bg-slate-800"></span>
+                    </h3>
+                    {result.alternatives.map((alt: any, idx: number) => (
+                      <RestaurantCard 
+                        key={idx} 
+                        res={alt} 
+                        favorites={favorites}
+                        onToggleFavorite={toggleFavorite}
+                        onShare={shareCard}
+                        reviews={userReviews}
+                        onAddReview={addReview}
+                        t={t}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -433,24 +448,27 @@ export default function App() {
         )}
 
         {activeTab === 'favorites' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-2xl font-black mb-8">{t('favorites')}</h2>
+          <div className="animate-in fade-in duration-500">
+            <h2 className="text-2xl font-black text-white mb-8 px-1">{t('favorites')}</h2>
             {favorites.length === 0 ? (
-              <div className="text-center py-20 opacity-20">
-                <span className="text-6xl block mb-4">🍱</span>
-                <p className="font-bold">{t('noFavorites')}</p>
+              <div className="bg-slate-900/40 border border-slate-800/50 rounded-3xl p-12 flex flex-col items-center justify-center text-slate-500 text-center italic">
+                <span className="text-5xl mb-4 opacity-20">🍱</span>
+                <p>{t('noFavorites')}</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {favorites.map((fav, i) => (
-                  <div key={i} className="bg-slate-900/80 backdrop-blur-md p-5 rounded-3xl border border-slate-800 flex justify-between items-center shadow-lg">
-                    <div className="flex-1 mr-4">
-                      <h3 className="font-bold text-lg text-white">{fav.name}</h3>
-                      <p className="text-slate-500 text-xs truncate max-w-[200px]">{fav.address}</p>
+              <div className="grid gap-4">
+                {favorites.map((fav: any, i: number) => (
+                  <div key={i} className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-3xl p-5 flex justify-between items-center group hover:bg-slate-800/60 transition-all">
+                    <div className="flex-1">
+                      <h3 className="text-white font-bold mb-1 group-hover:text-blue-400 transition-colors">{fav.name}</h3>
+                      <p className="text-slate-500 text-xs truncate max-w-[200px]">📍 {fav.address}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <a href={fav.gmapsUrl} target="_blank" rel="noreferrer" className="p-2 bg-slate-800 rounded-full text-lg">🗺️</a>
-                      <button onClick={() => toggleFavorite(fav)} className="p-2 bg-slate-800 rounded-full text-lg">❤️</button>
+                    <div className="flex items-center gap-2">
+                      <a href={fav.gmapsUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-slate-700/50 hover:bg-slate-600 rounded-xl transition-colors">🗺️</a>
+                      <button 
+                        onClick={() => toggleFavorite(fav)} 
+                        className="p-2 bg-slate-700/50 hover:bg-slate-600 rounded-xl text-lg transition-colors"
+                      >❤️</button>
                     </div>
                   </div>
                 ))}
@@ -460,49 +478,53 @@ export default function App() {
         )}
 
         {activeTab === 'settings' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-2xl font-black mb-8">{t('settings')}</h2>
-            <div className="bg-slate-900/50 rounded-3xl p-6 border border-slate-800">
-              <p className="text-slate-400 font-bold mb-4 uppercase text-xs tracking-widest">Language / 語言</p>
-              <div className="flex bg-slate-950 p-1 rounded-xl">
-                <button 
-                  onClick={() => setLang('zh')}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${lang === 'zh' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                  繁體中文
-                </button>
-                <button 
-                  onClick={() => setLang('en')}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${lang === 'en' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                  English
-                </button>
+          <div className="animate-in fade-in duration-500">
+            <h2 className="text-2xl font-black text-white mb-8 px-1">{t('settings')}</h2>
+            <div className="bg-slate-900/40 border border-slate-800/50 rounded-3xl p-6 space-y-8">
+              <div className="space-y-4">
+                <label className="text-slate-400 text-xs font-black uppercase tracking-widest px-1">Language / 語言</label>
+                <div className="bg-slate-800/80 rounded-2xl p-1.5 flex gap-1">
+                  <button 
+                    onClick={() => setLang('zh')}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${lang === 'zh' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    繁體中文
+                  </button>
+                  <button 
+                    onClick={() => setLang('en')}
+                    className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${lang === 'en' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    English
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
-      </div>
+      </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-slate-950/80 backdrop-blur-2xl border-t border-white/5 safe-area-inset-bottom z-50">
-        <div className="max-w-md mx-auto px-6 py-3 flex justify-around items-center">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 p-5">
+        <div className="max-w-md mx-auto bg-slate-900/80 backdrop-blur-2xl border border-slate-800/50 rounded-[2.5rem] flex justify-around items-center p-2 shadow-2xl shadow-black">
           <button 
             onClick={() => setActiveTab('lottery')}
-            className={`flex flex-col items-center gap-1 p-2 min-w-[64px] transition-all ${activeTab === 'lottery' ? 'text-blue-400' : 'text-slate-500'}`}
+            className={`flex flex-col items-center gap-1.5 py-3 px-6 rounded-3xl transition-all duration-300 ${activeTab === 'lottery' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <span className="text-2xl">🎰</span>
             <span className="text-[10px] font-black uppercase tracking-tighter">{t('lottery')}</span>
           </button>
+          
           <button 
             onClick={() => setActiveTab('favorites')}
-            className={`flex flex-col items-center gap-1 p-2 min-w-[64px] transition-all ${activeTab === 'favorites' ? 'text-blue-400' : 'text-slate-500'}`}
+            className={`flex flex-col items-center gap-1.5 py-3 px-6 rounded-3xl transition-all duration-300 ${activeTab === 'favorites' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <span className="text-2xl">❤️</span>
             <span className="text-[10px] font-black uppercase tracking-tighter">Favorites</span>
           </button>
+
           <button 
             onClick={() => setActiveTab('settings')}
-            className={`flex flex-col items-center gap-1 p-2 min-w-[64px] transition-all ${activeTab === 'settings' ? 'text-blue-400' : 'text-slate-500'}`}
+            className={`flex flex-col items-center gap-1.5 py-3 px-6 rounded-3xl transition-all duration-300 ${activeTab === 'settings' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <span className="text-2xl">⚙️</span>
             <span className="text-[10px] font-black uppercase tracking-tighter">Settings</span>
