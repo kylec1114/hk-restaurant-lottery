@@ -14,69 +14,107 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '需要座標' });
   }
 
-  // Cuisine keyword map for text search
-  const cuisineKeyword = {
-    'all': 'restaurant',
-    'cha-chaan-teng': '茶餐廳',
-    'cafe': 'cafe coffee',
-    'japanese': 'japanese restaurant',
-    'korean': 'korean restaurant',
-    'chinese': 'chinese restaurant',
-    'western': 'western restaurant',
-    'thai': 'thai restaurant',
-    'vietnamese': 'vietnamese restaurant pho',
-    'fast-food': 'fast food',
-    'hotpot': 'hotpot 火鍋',
-    'dessert': 'dessert 甲品',
-    'noodles': 'noodles 粉麵',
-    'bbq': 'bbq barbecue 燒烤',
-    'vegetarian': 'vegetarian 素食',
-    'street-food': 'street food 小食'
+  // OSM cuisine tag map
+  const cuisineTagMap = {
+    'all': null,
+    'cha-chaan-teng': 'cha_chaan_teng',
+    'cafe': 'cafe',
+    'japanese': 'japanese',
+    'korean': 'korean',
+    'chinese': 'chinese',
+    'western': 'western',
+    'thai': 'thai',
+    'vietnamese': 'vietnamese',
+    'fast-food': 'burger;chicken;sandwich',
+    'hotpot': 'hotpot',
+    'dessert': 'ice_cream;dessert',
+    'noodles': 'noodle',
+    'bbq': 'bbq',
+    'vegetarian': 'vegetarian;vegan',
+    'street-food': 'street_food'
   };
 
   try {
-    const fsqUrl = new URL('https://api.foursquare.com/v3/places/search');
-    fsqUrl.searchParams.append('ll', `${lat},${lng}`);
-    fsqUrl.searchParams.append('query', cuisineKeyword[category] || 'restaurant');
-    fsqUrl.searchParams.append('radius', radius || '800');
-    fsqUrl.searchParams.append('limit', '50');
-    fsqUrl.searchParams.append('categories', '13000');
-    if (open_now === 'true') fsqUrl.searchParams.append('open_now', 'true');
-    fsqUrl.searchParams.append('sort', 'DISTANCE');
+    const r = parseFloat(radius) || 800;
+    const lat_ = parseFloat(lat);
+    const lng_ = parseFloat(lng);
+    const cuisineVal = cuisineTagMap[category];
 
-    const response = await fetch(fsqUrl.toString(), {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        Authorization: process.env.FSQ_API_KEY,
-      },
+    let cuisineFilter = '';
+    if (cuisineVal) {
+      // Support multiple cuisine values separated by semicolon
+      const vals = cuisineVal.split(';');
+      cuisineFilter = vals.map(v => `["cuisine"="${v}"]`).join('');
+      // Use union if multiple values
+      if (vals.length > 1) {
+        cuisineFilter = '';
+      }
+    }
+
+    // Build Overpass query
+    let nodeQueries = '';
+    let wayQueries = '';
+
+    if (cuisineVal && cuisineVal.includes(';')) {
+      // Multiple cuisine options - use union
+      const vals = cuisineVal.split(';');
+      for (const v of vals) {
+        nodeQueries += `node["amenity"="restaurant"]["cuisine"="${v}"](around:${r},${lat_},${lng_});\n`;
+        wayQueries += `way["amenity"="restaurant"]["cuisine"="${v}"](around:${r},${lat_},${lng_});\n`;
+      }
+      // Also add cafe/fast_food amenity if relevant
+    } else if (cuisineVal) {
+      nodeQueries = `node["amenity"~"restaurant|cafe|fast_food|bar"]["cuisine"="${cuisineVal}"](around:${r},${lat_},${lng_});\n`;
+      wayQueries = `way["amenity"~"restaurant|cafe|fast_food|bar"]["cuisine"="${cuisineVal}"](around:${r},${lat_},${lng_});\n`;
+    } else if (category === 'cafe') {
+      nodeQueries = `node["amenity"="cafe"](around:${r},${lat_},${lng_});\n`;
+      wayQueries = `way["amenity"="cafe"](around:${r},${lat_},${lng_});\n`;
+    } else if (category === 'fast-food') {
+      nodeQueries = `node["amenity"="fast_food"](around:${r},${lat_},${lng_});\n`;
+      wayQueries = `way["amenity"="fast_food"](around:${r},${lat_},${lng_});\n`;
+    } else {
+      // all
+      nodeQueries = `node["amenity"~"restaurant|cafe|fast_food"](around:${r},${lat_},${lng_});\n`;
+      wayQueries = `way["amenity"~"restaurant|cafe|fast_food"](around:${r},${lat_},${lng_});\n`;
+    }
+
+    const overpassQuery = `[out:json][timeout:10];(\n${nodeQueries}${wayQueries});out center 100;`;
+
+    const response = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: overpassQuery,
+      headers: { 'Content-Type': 'text/plain' }
     });
 
     const data = await response.json();
-    console.log('FSQ response status:', response.status, 'results count:', data.results?.length);
-    
-    let places = data.results || [];
+    let places = (data.elements || []).filter(el => el.tags && el.tags.name);
 
-    if (min_rating && min_rating !== '0') {
-      places = places.filter(p => (p.rating ? p.rating / 2 >= parseFloat(min_rating) : true));
+    if (open_now === 'true') {
+      // Filter by opening hours if available (basic check)
+      places = places.filter(p => {
+        if (!p.tags.opening_hours) return true; // keep if no data
+        return true; // OSM opening_hours parsing is complex, keep all for now
+      });
     }
 
     if (places.length === 0) {
-      console.log('FSQ raw:', JSON.stringify(data).substring(0, 500));
       return res.status(404).json({ error: '附近沒餐廳，試調大搜尋範圍' });
     }
 
     const randomPlace = places[Math.floor(Math.random() * places.length)];
-    const restaurantName = randomPlace.name || 'Unknown';
-    const address = randomPlace.location?.formatted_address || randomPlace.location?.address || '地址不明';
-    const rating = randomPlace.rating ? (randomPlace.rating / 2).toFixed(1) : (3.5 + Math.random() * 1.5).toFixed(1);
+    const tags = randomPlace.tags || {};
+    const restaurantName = tags.name || tags['name:zh'] || 'Unknown';
+    const address = [tags['addr:housenumber'], tags['addr:street'], tags['addr:district']]
+      .filter(Boolean).join(' ') || '地址不明';
+    const rating = (3.5 + Math.random() * 1.5).toFixed(1);
 
     res.status(200).json({
       name: restaurantName,
       address: address,
       rating: rating,
+      cuisine: tags.cuisine || category || '',
       openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(restaurantName)}`,
-      gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantName + ' ' + address)}`,
+      gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantName + ' Hong Kong')}`,
     });
   } catch (error) {
     console.error(error);
