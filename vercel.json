@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/lucky-restaurant.js": {
+      "maxDuration": 30
+    }
+  }
+}
