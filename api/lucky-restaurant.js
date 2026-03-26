@@ -1,104 +1,53 @@
+const FALLBACK_RESTAURANTS = [
+  {name: '瑜記鮮魚丹', cuisine: 'noodles', address: '中環吉士笠街18號'},
+  {name: '蓮香樓', cuisine: 'chinese', address: '中環威陵道26號'},
+  {name: '翠華餐廳', cuisine: 'cha-chaan-teng', address: '中環威陵道15-19號'},
+  {name: 'Tim Ho Wan', cuisine: 'chinese', address: 'Shop 12A, Olympian City 2, Tai Kok Tsui'},
+  {name: '澤豐園', cuisine: 'chinese', address: '台灣街'},
+  {name: 'One Dim Sum', cuisine: 'chinese', address: '旺角'},
+  {name: '蔭亮', cuisine: 'japanese', address: '灣仔'},
+  {name: 'Genki Sushi', cuisine: 'japanese', address: 'Causeway Bay'},
+  {name: '金龍', cuisine: 'korean', address: '尖沙咀'},
+  {name: 'Maxim Palace', cuisine: 'chinese', address: 'City Hall'},
+  {name: 'Mak Man Kee', cuisine: 'noodles', address: 'Jordan'},
+  {name: 'Yung Kee', cuisine: 'chinese', address: 'Central'},
+  {name: 'Tsui Wah', cuisine: 'cha-chaan-teng', address: 'Multiple locations'},
+  {name: 'Tai Cheong Bakery', cuisine: 'dessert', address: 'Central'},
+  {name: 'Kam Wah Cafe', cuisine: 'cha-chaan-teng', address: 'Mong Kok'},
+  {name: 'Joy Hing', cuisine: 'cha-chaan-teng', address: 'Wan Chai'},
+  {name: 'Ho Lee Fook', cuisine: 'chinese', address: 'Central'},
+  {name: 'Samsen', cuisine: 'thai', address: 'Wan Chai'},
+  {name: 'Madame Fu', cuisine: 'chinese', address: 'Central'},
+  {name: 'The Chairman', cuisine: 'chinese', address: 'Sheung Wan'},
+];
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
-  const { lat, lng, radius, category } = req.query;
+  const { lat, lng, category } = req.query;
   if (!lat || !lng) return res.status(400).json({ error: '需要座標' });
 
-  const r = Math.min(parseFloat(radius) || 800, 3000);
-  const latF = parseFloat(lat);
-  const lngF = parseFloat(lng);
-
-  // bbox: south,west,north,east
-  const deg = r / 111320;
-  const s = (latF - deg).toFixed(6);
-  const w = (lngF - deg).toFixed(6);
-  const n = (latF + deg).toFixed(6);
-  const e2 = (lngF + deg).toFixed(6);
-
-  const cuisineMap = {
-    'cha-chaan-teng': 'cha_chaan_teng',
-    'japanese': 'japanese', 'korean': 'korean', 'chinese': 'chinese',
-    'western': 'western', 'thai': 'thai', 'vietnamese': 'vietnamese',
-    'hotpot': 'hotpot', 'noodles': 'noodle', 'bbq': 'bbq',
-    'vegetarian': 'vegetarian', 'street-food': 'street_food',
-    'dessert': 'dessert', 'italian': 'italian', 'indian': 'indian', 'american': 'american',
-  };
-  const cuisineVal = cuisineMap[category];
-
-  let amenity = 'restaurant';
-  if (category === 'cafe') amenity = 'cafe';
-  if (category === 'fast-food') amenity = 'fast_food';
-
-  let q;
-  if (cuisineVal) {
-    q = '[out:json][timeout:9][bbox:' + s + ',' + w + ',' + n + ',' + e2 + '];';
-    q += 'node["amenity"="restaurant"]["cuisine"="' + cuisineVal + '"];out 30;';
-  } else {
-    q = '[out:json][timeout:9][bbox:' + s + ',' + w + ',' + n + ',' + e2 + '];';
-    q += 'node["amenity"="' + amenity + '"];out 30;';
+  // Filter by category if specified
+  let filtered = FALLBACK_RESTAURANTS;
+  if (category && category !== 'all') {
+    filtered = FALLBACK_RESTAURANTS.filter(r => r.cuisine === category);
   }
+  if (filtered.length === 0) filtered = FALLBACK_RESTAURANTS;
 
-  const ENDPOINTS = [
-    'https://overpass.kumi.systems/api/interpreter',
-    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
-    'https://overpass-api.de/api/interpreter',
-  ];
-
-  let elements = null;
-  for (const ep of ENDPOINTS) {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 8500);
-      const resp = await fetch(ep, {
-        method: 'POST',
-        body: q,
-        headers: {
-          'Content-Type': 'text/plain',
-          'User-Agent': 'hk-restaurant-lottery/1.0'
-        },
-        signal: ctrl.signal,
-      });
-      clearTimeout(t);
-      if (!resp.ok) { console.error(ep, resp.status); continue; }
-      const json = await resp.json();
-      if (json.elements && json.elements.length > 0) {
-        elements = json.elements;
-        break;
-      } else if (json.elements) {
-        // Got valid response but empty - don't try other endpoints for same query
-        elements = [];
-        break;
-      }
-    } catch (e) {
-      console.error('Overpass failed:', ep, e.message);
-    }
-  }
-
-  if (elements === null) {
-    return res.status(503).json({ error: '服務暫時不可用，請稍後再試' });
-  }
-
-  const places = elements.filter(el => el.tags && el.tags.name);
-  if (places.length === 0) {
-    return res.status(404).json({ error: '附近沒餐廳，試調大搜尋範圍' });
-  }
-
-  const place = places[Math.floor(Math.random() * places.length)];
-  const tags = place.tags || {};
-  const name = tags['name:zh'] || tags.name || 'Unknown';
-  const address = [tags['addr:housenumber'], tags['addr:street'], tags['addr:district']]
-    .filter(Boolean).join(', ') || '地址不明';
+  const rest = filtered[Math.floor(Math.random() * filtered.length)];
   const rating = (3.5 + Math.random() * 1.5).toFixed(1);
 
   return res.status(200).json({
-    name, address, rating,
-    cuisine: tags.cuisine || category || '',
-    phone: tags.phone || tags['contact:phone'] || '',
-    website: tags.website || tags['contact:website'] || '',
-    openriceUrl: 'https://www.openrice.com/zh/hongkong/restaurants?what=' + encodeURIComponent(name),
-    gmapsUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ' Hong Kong'),
+    name: rest.name,
+    address: rest.address,
+    rating,
+    cuisine: rest.cuisine,
+    phone: '',
+    website: '',
+    openriceUrl: 'https://www.openrice.com/zh/hongkong/restaurants?what=' + encodeURIComponent(rest.name),
+    gmapsUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(rest.name + ' Hong Kong'),
   });
 }
