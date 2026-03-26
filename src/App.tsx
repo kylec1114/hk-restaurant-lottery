@@ -34,6 +34,7 @@ const LOCATIONS: any = {
     { name: '台北信義區', lat: 25.0330, lng: 121.5654 },
     { name: '西門町', lat: 25.0422, lng: 121.5082 },
     { name: '台中逢甲', lat: 24.1787, lng: 120.6468 },
+    { name: '高雄駁二', lat: 22.6191, lng: 120.2815 },
   ]
 };
 
@@ -92,7 +93,7 @@ const TRANSLATIONS: any = {
   }
 };
 
-const logoUrl = "https://drive.google.com/thumbnail?id=1hzsBQTTjJ1BzyNRC9GkIE57YQmGNajO&sz=w800";
+const logoUrl = "https://drive.google.com/uc?id=1hzsBQTTjJ1BzyNRjC9GkIE57YQmGNajO";
 
 // --- Components ---
 const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite, onShare, reviews = [], onAddReview, t }: any) => {
@@ -101,15 +102,15 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
   const isFavorite = favorites.some((f: any) => f.name === res.name);
 
   return (
-    <div className={`bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/20 ${isMain ? 'p-8 scale-100' : 'p-6 opacity-90 scale-95 hover:scale-100 hover:opacity-100'}`}>
+    <div className={`bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/20 ${isMain ? 'p-8 ring-2 ring-blue-500/20 mb-8' : 'p-6 mb-4'}`}>
       <div className="flex justify-between items-start mb-6">
         <div className="flex-1">
-          <h2 className={`${isMain ? 'text-3xl' : 'text-xl'} font-black text-white mb-2 leading-tight`}>{res.name}</h2>
-          <p className="text-slate-400 text-xs flex items-center gap-2">
-            <span className="opacity-60 text-lg">📍</span> {res.address}
+          <h3 className={`font-black text-white leading-tight ${isMain ? 'text-4xl' : 'text-2xl'}`}>{res.name}</h3>
+          <p className="text-slate-400 text-xs mt-3 flex items-center gap-2">
+            <span className="text-blue-500">📍</span> {res.address}
           </p>
         </div>
-        <button 
+        <button
           onClick={() => onToggleFavorite(res)}
           className="text-2xl p-4 rounded-[1.5rem] bg-slate-900/50 hover:bg-slate-700/50 transition-all duration-300 active:scale-75 border border-white/5"
         >
@@ -117,38 +118,37 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
         </button>
       </div>
 
-      <div className="flex gap-4 mb-8">
-        <div className="bg-green-500/10 text-green-400 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-green-500/10">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          {t('openNow')}
-        </div>
-        <div className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-blue-500/10">
+      <div className="flex flex-wrap gap-3 mb-8">
+        <span className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+          🟢 {t('openNow')}
+        </span>
+        <span className="bg-amber-500/10 text-amber-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
           ⭐ {res.rating || '4.2'}
-        </div>
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <a 
-          href={res.openriceUrl} 
-          target="_blank" 
-          rel="noreferrer"
-          className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-200 py-4 rounded-2xl font-black text-[10px] transition-all text-center uppercase tracking-widest border border-white/5"
+        <a
+          href={res.openriceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 py-4 bg-slate-900/80 rounded-2xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all border border-white/5 active:scale-95"
         >
           🥡 {t('openrice')}
         </a>
-        <a 
-          href={res.gmapsUrl} 
-          target="_blank" 
-          rel="noreferrer"
-          className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-200 py-4 rounded-2xl font-black text-[10px] transition-all text-center uppercase tracking-widest border border-white/5"
+        <a
+          href={res.gmapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 py-4 bg-slate-900/80 rounded-2xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all border border-white/5 active:scale-95"
         >
           🗺️ {t('gmaps')}
         </a>
       </div>
 
       {isMain && (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <button 
+        <div className="space-y-8">
+          <button
             onClick={() => onShare(res)}
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-5 rounded-2xl font-black text-xs transition-all shadow-2xl shadow-blue-900/40 uppercase tracking-[0.2em] border border-white/10 active:scale-[0.98]"
           >
@@ -156,36 +156,35 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           </button>
 
           <div className="pt-8 border-t border-white/5">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-white font-black text-sm uppercase tracking-widest">{t('reviews')}</h3>
-              <span className="bg-slate-900 text-slate-400 text-[10px] px-3 py-1 rounded-full font-black border border-white/5">
+            <h4 className="text-white font-black text-xs uppercase tracking-widest mb-6 flex items-center gap-3">
+              {t('reviews')}
+              <span className="bg-slate-700 text-[9px] px-2 py-0.5 rounded-full">
                 {reviews.filter((r: any) => r.restaurantName === res.name).length}
               </span>
-            </div>
-
-            <div className="space-y-4 max-h-[250px] overflow-y-auto mb-6 pr-2 custom-scrollbar">
+            </h4>
+            
+            <div className="space-y-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar mb-6">
               {reviews.filter((r: any) => r.restaurantName === res.name).length === 0 ? (
-                <div className="text-slate-600 text-xs text-center py-8 italic bg-slate-900/30 rounded-3xl border border-dashed border-white/5">
-                  仲未有評論...
-                </div>
+                <p className="text-slate-500 text-[10px] italic py-4">仲未有評論...</p>
               ) : (
                 reviews.filter((r: any) => r.restaurantName === res.name).map((r: any) => (
-                  <div key={r.id} className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 animate-in slide-in-from-right-4 duration-500">
-                    <p className="text-slate-200 text-xs leading-relaxed mb-3">{r.content}</p>
-                    <span className="text-slate-600 text-[9px] font-black uppercase tracking-widest">{r.date}</span>
+                  <div key={r.id} className="bg-slate-900/40 p-4 rounded-2xl border border-white/5">
+                    <p className="text-slate-300 text-xs leading-relaxed">{r.content}</p>
+                    <span className="text-slate-600 text-[9px] mt-2 block">{r.date}</span>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="flex gap-2">
-              <input 
+            <div className="flex gap-3">
+              <input
+                type="text"
                 value={newReview}
                 onChange={(e) => setNewReview(e.target.value)}
                 placeholder={t('writeReview')}
                 className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
               />
-              <button 
+              <button
                 onClick={() => {
                   if (newReview.trim()) {
                     onAddReview(res.name, newReview);
@@ -210,7 +209,7 @@ export default function App() {
   const [lang, setLang] = useState('zh');
   const [region, setRegion] = useState('hk');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     try {
       const saved = localStorage.getItem('favorites');
@@ -229,7 +228,7 @@ export default function App() {
   const [openNow, setOpenNow] = useState(true);
   const [isCuisineExpanded, setIsCuisineExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentCoords, setCurrentCoords] = useState<any>(null);
+  const [currentCoords, setCurrentCoords] = useState(null);
   const [slotText, setSlotText] = useState('');
 
   const slotOptions = ['正在分析您的口味...', '正在查看附近的美味...', '即將揭暁您的盲盒...', '正在挑選特色餐廳...', '尋找最佳食評中...'];
@@ -262,7 +261,7 @@ export default function App() {
 
     try {
       let lat = 22.3193, lng = 114.1694; // Default Mong Kok
-
+      
       if (searchQuery) {
         // Try to find in suggested locations
         const found = LOCATIONS[region].find((l: any) => l.name.includes(searchQuery));
@@ -317,7 +316,7 @@ export default function App() {
   const toggleFavorite = (res: any) => {
     if (!res || !res.name) return;
     setFavorites((prev: any) => 
-      prev.some((f: any) => f.name === res.name) 
+      prev.some((f: any) => f.name === res.name)
         ? prev.filter((f: any) => f.name !== res.name)
         : [...prev, res]
     );
@@ -341,59 +340,72 @@ export default function App() {
   const displayedCuisines = isCuisineExpanded ? CUISINES : CUISINES.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-blue-500/30">
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(30,58,138,0.2),transparent_50%)] pointer-events-none" />
-      
-      <header className="pt-12 pb-8 px-6 flex flex-col items-center relative">
-        <img src={logoUrl} className="h-24 mb-4 object-contain animate-in fade-in zoom-in duration-1000" alt="Logo" />
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-black tracking-[0.3em] uppercase text-white/90">{t('title')}</h1>
-          <span className="bg-blue-600/20 text-blue-400 text-[10px] px-3 py-1 rounded-full font-black border border-blue-500/20 tracking-widest">VER 2.1</span>
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans pb-32">
+      {/* Header */}
+      <div className="pt-12 pb-8 px-6 text-center bg-gradient-to-b from-blue-600/10 to-transparent">
+        <img 
+          src={logoUrl} 
+          alt="Logo" 
+          className="h-24 mx-auto mb-4 object-contain drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]" 
+        />
+        <h1 className="text-3xl font-black text-white tracking-tighter mb-1">{t('title')}</h1>
+        <div className="inline-block bg-blue-500/20 text-blue-400 px-4 py-1 rounded-full text-[10px] font-black tracking-widest border border-blue-500/20">
+          VER 2.1
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-md mx-auto px-6 pb-32 relative">
+      <div className="max-w-md mx-auto px-6 space-y-12">
         {activeTab === 'lottery' && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            
+          <>
             {/* Manual Search Section */}
-            <section className="bg-slate-800/40 p-8 rounded-[2.5rem] border border-slate-700/50 space-y-6">
-               <div className="space-y-4">
-                 <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">📍 {t('searchPlace')}</h3>
-                    <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{region.toUpperCase()}</span>
-                 </div>
-                 <div className="relative group">
-                    <input 
-                      type="text" 
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={t('searchPlace')}
-                      className="w-full bg-slate-900/80 border border-slate-700/50 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
-                    />
-                    {searchQuery && (
-                      <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">✕</button>
-                    )}
-                 </div>
-                 <div className="flex flex-wrap gap-2">
-                    <span className="text-slate-500 text-[9px] font-black uppercase tracking-widest mr-2 flex items-center">{t('suggested')}:</span>
-                    {LOCATIONS[region].slice(0, 4).map((loc: any) => (
-                      <button 
-                        key={loc.name}
-                        onClick={() => setSearchQuery(loc.name)}
-                        className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border border-white/5"
-                      >
-                        + {loc.name}
-                      </button>
-                    ))}
-                 </div>
-               </div>
-            </section>
+            <div className="bg-slate-900/40 p-8 rounded-[2.5rem] border border-white/5 space-y-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-white font-black text-xs uppercase tracking-widest flex items-center gap-3">
+                  <span className="text-blue-500">📍</span> {t('searchPlace')}
+                </h3>
+                <span className="bg-blue-500/10 text-blue-400 text-[9px] px-3 py-1 rounded-full font-black border border-blue-500/20 uppercase tracking-widest">
+                  {region.toUpperCase()}
+                </span>
+              </div>
+              
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('searchPlace')}
+                  className="w-full bg-slate-900/80 border border-slate-700/50 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="text-slate-500 text-[10px] w-full mb-1 font-bold">{t('suggested')}:</span>
+                {LOCATIONS[region].slice(0, 4).map((loc: any) => (
+                  <button
+                    key={loc.name}
+                    onClick={() => setSearchQuery(loc.name)}
+                    className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border border-white/5"
+                  >
+                    + {loc.name}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Cuisine Section */}
-            <section className="bg-slate-800/40 p-8 rounded-[2.5rem] border border-slate-700/50 space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">{t('cuisine')}</h3>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-white font-black text-xs uppercase tracking-widest flex items-center gap-3">
+                  <span className="text-blue-500">🍱</span> {t('cuisine')}
+                </h3>
                 <button 
                   onClick={() => setIsCuisineExpanded(!isCuisineExpanded)}
                   className="text-blue-400 text-[9px] font-black hover:text-blue-300 bg-blue-500/10 px-4 py-1.5 rounded-full uppercase tracking-widest transition-all"
@@ -401,9 +413,10 @@ export default function App() {
                   {isCuisineExpanded ? '收埋' : '顯示全部'}
                 </button>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              
+              <div className="grid grid-cols-3 gap-4">
                 {displayedCuisines.map(c => (
-                  <button 
+                  <button
                     key={c.id}
                     onClick={() => setSelectedCuisine(c.id)}
                     className={`flex flex-col items-center p-4 rounded-3xl border transition-all duration-300 active:scale-90 ${
@@ -412,185 +425,245 @@ export default function App() {
                         : 'bg-slate-900/50 border-white/5 text-slate-400'
                     }`}
                   >
-                    <span className="text-xl mb-3">{c.icon}</span>
-                    <span className="text-[10px] font-black uppercase tracking-tighter">{c.name}</span>
+                    <span className="text-3xl mb-3 block drop-shadow-lg">{c.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider">{c.name}</span>
                   </button>
                 ))}
               </div>
-            </section>
+            </div>
 
             {/* Controls Section */}
-            <section className="bg-slate-800/40 p-8 rounded-[2.5rem] border border-slate-700/50 space-y-8">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center px-1">
-                  <h3 className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">{t('distance')}</h3>
-                  <span className="bg-blue-600/20 text-blue-400 text-xs px-4 py-1.5 rounded-full font-black border border-blue-500/20">{distance}m</span>
+            <div className="bg-slate-900/40 p-8 rounded-[2.5rem] border border-white/5 space-y-10">
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-white font-black text-xs uppercase tracking-widest flex items-center gap-3">
+                    <span className="text-blue-500">📏</span> {t('distance')}
+                  </h3>
+                  <span className="text-blue-400 font-black text-sm">{distance}m</span>
                 </div>
-                <input 
-                  type="range" min="200" max="2000" step="100"
+                <input
+                  type="range"
+                  min="200"
+                  max="2000"
+                  step="100"
                   value={distance}
                   onChange={(e) => setDistance(parseInt(e.target.value))}
                   className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-1">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                  <h3 className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">{t('openNow')}</h3>
-                </div>
-                <button 
+              <div className="flex justify-between items-center">
+                <h3 className="text-white font-black text-xs uppercase tracking-widest flex items-center gap-3">
+                  <span className="text-blue-500">🕒</span> {t('openNow')}
+                </h3>
+                <button
                   onClick={() => setOpenNow(!openNow)}
                   className={`w-14 h-7 rounded-full transition-all duration-300 relative border border-white/10 ${openNow ? 'bg-blue-600' : 'bg-slate-900'}`}
                 >
-                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-300 shadow-lg ${openNow ? 'left-8' : 'left-1'}`} />
+                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-300 ${openNow ? 'right-1 shadow-lg' : 'left-1'}`} />
                 </button>
               </div>
-            </section>
+            </div>
 
             {/* Draw Button */}
-            <button 
-              onClick={handleLottery}
-              disabled={loading}
-              className="w-full group relative overflow-hidden h-28 rounded-[2.5rem] transition-all duration-300 active:scale-95 disabled:opacity-50"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-[length:200%_auto] animate-gradient group-hover:scale-110 transition-transform duration-700" />
-              <div className="relative flex flex-col items-center justify-center gap-1">
-                {loading ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white animate-pulse">{slotText}</span>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-3xl mb-1 group-hover:scale-125 transition-transform duration-500">🎯</span>
-                    <span className="text-sm font-black uppercase tracking-[0.4em] text-white group-hover:tracking-[0.5em] transition-all duration-500">{t('draw')}</span>
-                  </>
-                )}
+            <div className="fixed bottom-32 left-0 right-0 px-6 z-20 pointer-events-none">
+              <div className="max-w-md mx-auto pointer-events-auto">
+                <button
+                  onClick={handleLottery}
+                  disabled={loading}
+                  className={`w-full py-7 rounded-[2rem] font-black text-lg transition-all shadow-2xl flex items-center justify-center gap-4 border border-white/10 ${
+                    loading 
+                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-[1.02] active:scale-95 shadow-blue-900/40'
+                  }`}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-slate-500 border-t-white rounded-full animate-spin" />
+                      <span className="text-sm italic">{slotText}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-2xl">🎯</span>
+                      <span className="uppercase tracking-[0.2em]">{t('draw')}</span>
+                    </>
+                  )}
+                </button>
               </div>
-            </button>
+            </div>
 
             {/* Result Section */}
-            {result && (
-              <div className="space-y-10 animate-in fade-in zoom-in-95 duration-700">
-                {result.error ? (
-                  <div className="bg-red-500/10 border border-red-500/20 p-12 rounded-[2.5rem] text-center space-y-4">
-                    <span className="text-4xl block mb-4">🍽️</span>
-                    <p className="text-red-400 font-black text-sm leading-relaxed">{t('noResults')}</p>
-                    <button onClick={() => setDistance(2000)} className="text-red-400 text-[10px] font-black uppercase tracking-widest hover:underline">加大搜尋範圍</button>
-                  </div>
-                ) : (
-                  <>
-                    <RestaurantCard 
-                      res={result.restaurant} 
-                      isMain={true}
-                      favorites={favorites}
-                      onToggleFavorite={toggleFavorite}
-                      onShare={shareCard}
-                      reviews={userReviews}
-                      onAddReview={addReview}
-                      t={t}
-                    />
-
-                    {result.alternatives && result.alternatives.length > 0 && (
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                          <div className="h-px flex-1 bg-white/10" />
-                          <h3 className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">{t('alternatives')}</h3>
-                          <div className="h-px flex-1 bg-white/10" />
-                        </div>
-                        <div className="space-y-6">
+            <div id="result-area" className="pt-8">
+              {result && (
+                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                  {result.error ? (
+                    <div className="bg-red-500/10 border border-red-500/20 p-8 rounded-[2.5rem] text-center space-y-4">
+                      <span className="text-4xl block">🍽️</span>
+                      <p className="text-red-400 font-black text-xs uppercase tracking-widest leading-relaxed">
+                        {t('noResults')}
+                      </p>
+                      <button 
+                        onClick={() => setDistance(2000)}
+                        className="text-red-400 text-[10px] font-black uppercase tracking-widest hover:underline"
+                      >
+                        加大搜尋範圍
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <RestaurantCard 
+                        res={result.restaurant} 
+                        isMain={true} 
+                        favorites={favorites} 
+                        onToggleFavorite={toggleFavorite}
+                        onShare={shareCard}
+                        reviews={userReviews}
+                        onAddReview={addReview}
+                        t={t}
+                      />
+                      
+                      {result.alternatives && result.alternatives.length > 0 && (
+                        <div className="mt-12 space-y-6">
+                          <h3 className="text-white font-black text-xs uppercase tracking-widest flex items-center gap-3 px-2">
+                            <span className="text-blue-500">🍱</span> {t('alternatives')}
+                          </h3>
                           {result.alternatives.map((alt: any) => (
                             <RestaurantCard 
-                              key={alt.name}
+                              key={alt.name} 
                               res={alt} 
-                              favorites={favorites}
+                              favorites={favorites} 
                               onToggleFavorite={toggleFavorite}
+                              reviews={userReviews}
+                              onAddReview={addReview}
                               t={t}
                             />
                           ))}
                         </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {activeTab === 'favorites' && (
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-8">
-            <h2 className="text-2xl font-black text-white mb-8">{t('favorites')}</h2>
-            {favorites.length === 0 ? (
-              <div className="bg-slate-800/40 p-20 rounded-[2.5rem] border border-slate-700/50 text-center space-y-6 border-dashed">
-                <span className="text-5xl block opacity-40 grayscale">🍱</span>
-                <p className="text-slate-500 font-black text-xs uppercase tracking-widest">{t('noFavorites')}</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {favorites.map((fav: any) => (
-                  <div key={fav.name} className="bg-slate-800/60 p-6 rounded-[2rem] border border-white/5 flex items-center justify-between group hover:bg-slate-700/50 transition-all duration-300">
-                    <div className="flex-1">
-                      <h3 className="text-white font-black text-sm mb-2">{fav.name}</h3>
-                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                        <span className="opacity-50">📍</span> {fav.district || 'HK'}
+          <div className="space-y-8 pt-4">
+            <h2 className="text-3xl font-black text-white tracking-tighter">{t('favorites')}</h2>
+            <div className="space-y-4">
+              {favorites.length === 0 ? (
+                <div className="bg-slate-900/40 p-12 rounded-[2.5rem] text-center border border-white/5 space-y-4 mt-8">
+                  <span className="text-4xl block opacity-30">🍱</span>
+                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest leading-relaxed">
+                    {t('noFavorites')}
+                  </p>
+                </div>
+              ) : (
+                favorites.map((fav: any) => (
+                  <div key={fav.name} className="bg-slate-800/40 p-6 rounded-[2rem] border border-white/5 flex items-center justify-between group hover:bg-slate-800/60 transition-all">
+                    <div>
+                      <h3 className="text-white font-black text-lg group-hover:text-blue-400 transition-colors">{fav.name}</h3>
+                      <p className="text-slate-500 text-[10px] mt-1 uppercase tracking-widest">
+                        <span className="text-blue-500">📍</span> {fav.district || 'HK'}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <a href={fav.gmapsUrl} target="_blank" rel="noreferrer" className="p-3 bg-slate-900 text-slate-400 rounded-2xl hover:text-white transition-all border border-white/5 text-lg">🗺️</a>
+                    <div className="flex gap-2">
+                      <a 
+                        href={fav.gmapsUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-3 bg-slate-900 text-slate-400 rounded-2xl hover:text-white transition-all border border-white/5"
+                      >
+                        🗺️
+                      </a>
                       <button 
                         onClick={() => toggleFavorite(fav)}
                         className="p-3 bg-slate-900 text-blue-400 rounded-2xl hover:scale-110 transition-all border border-white/5 text-lg"
-                      >❤️</button>
+                      >
+                        ❤️
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-8">
-            <h2 className="text-2xl font-black text-white mb-8">{t('settings')}</h2>
+          <div className="space-y-12 pt-4">
+            <h2 className="text-3xl font-black text-white tracking-tighter">{t('settings')}</h2>
             
-            <section className="bg-slate-800/40 p-8 rounded-[2.5rem] border border-slate-700/50 space-y-6">
-              <div>
-                <h4 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">{t('region')}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => setRegion('hk')} className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${region === 'hk' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}>Hong Kong 🇭🇰</button>
-                  <button onClick={() => setRegion('tw')} className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${region === 'tw' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}>Taiwan 🇹🇼</button>
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em] text-slate-500">{t('region')}</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => setRegion('hk')}
+                    className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${region === 'hk' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}
+                  >
+                    Hong Kong 🇭🇰
+                  </button>
+                  <button 
+                    onClick={() => setRegion('tw')}
+                    className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${region === 'tw' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}
+                  >
+                    Taiwan 🇹🇼
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">Language / 語言選擇</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => setLang('zh')} className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${lang === 'zh' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}>繁體中文</button>
-                  <button onClick={() => setLang('en')} className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${lang === 'en' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}>English</button>
+              <div className="space-y-6">
+                <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em] text-slate-500">Language / 語言選擇</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => setLang('zh')}
+                    className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${lang === 'zh' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}
+                  >
+                    繁體中文
+                  </button>
+                  <button 
+                    onClick={() => setLang('en')}
+                    className={`py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${lang === 'en' ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' : 'bg-slate-900/50 text-slate-500 border border-slate-700/50'}`}
+                  >
+                    English
+                  </button>
                 </div>
               </div>
-            </section>
+            </div>
           </div>
         )}
-      </main>
+      </div>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-3 flex justify-between shadow-2xl shadow-black items-center z-50">
-        <button onClick={() => setActiveTab('lottery')} className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'lottery' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
-          <span className="text-xl">🎰</span>
-          <span className="text-[9px] font-black uppercase tracking-widest">{t('lottery')}</span>
-        </button>
-        <button onClick={() => setActiveTab('favorites')} className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'favorites' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
-          <span className="text-xl">❤️</span>
-          <span className="text-[9px] font-black uppercase tracking-widest">{t('favorites')}</span>
-        </button>
-        <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'settings' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
-          <span className="text-xl">⚙️</span>
-          <span className="text-[9px] font-black uppercase tracking-widest">{t('settings')}</span>
-        </button>
-      </nav>
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent z-10">
+        <div className="max-w-md mx-auto bg-slate-900/80 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-3 flex justify-between items-center shadow-2xl shadow-black/50">
+          <button 
+            onClick={() => setActiveTab('lottery')}
+            className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'lottery' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            <span className="text-xl">🎰</span>
+            <span className="text-[9px] font-black uppercase tracking-widest">{t('lottery')}</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('favorites')}
+            className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'favorites' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            <span className="text-xl">❤️</span>
+            <span className="text-[9px] font-black uppercase tracking-widest">{t('favorites')}</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'settings' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            <span className="text-xl">⚙️</span>
+            <span className="text-[9px] font-black uppercase tracking-widest">{t('settings')}</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
