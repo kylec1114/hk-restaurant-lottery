@@ -1,0 +1,17 @@
+{
+  "name": "HK Restaurant Lottery 搵食盲盒",
+  "short_name": "搵食盲盒",
+  "description": "香港餐廳抽獎盲盒，解決「食乜好」的終極方案",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
