@@ -1,27 +1,3 @@
-const OVERPASS_ENDPOINTS = [
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass-api.de/api/interpreter',
-];
-
-async function queryOverpass(query) {
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        body: query,
-        headers: { 'Content-Type': 'text/plain' },
-        signal: AbortSignal.timeout(12000),
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data && data.elements) return data;
-    } catch (e) {
-      console.error('Overpass endpoint failed:', endpoint, e.message);
-    }
-  }
-  return null;
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,9 +7,13 @@ export default async function handler(req, res) {
   const { lat, lng, radius, category } = req.query;
   if (!lat || !lng) return res.status(400).json({ error: '需要座標' });
 
-  const r = Math.min(parseFloat(radius) || 800, 5000);
+  const r = Math.min(parseFloat(radius) || 800, 3000);
   const latF = parseFloat(lat);
   const lngF = parseFloat(lng);
+
+  // Convert radius to degrees for bbox (approx)
+  const deg = r / 111320;
+  const bbox = (latF - deg) + ',' + (lngF - deg) + ',' + (latF + deg) + ',' + (lngF + deg);
 
   const cuisineMap = {
     'cha-chaan-teng': 'cha_chaan_teng',
@@ -55,47 +35,70 @@ export default async function handler(req, res) {
   };
 
   const cuisineVal = cuisineMap[category];
-  const around = 'around:' + r + ',' + latF + ',' + lngF;
 
-  let query;
+  let q;
   if (cuisineVal) {
-    query = '[out:json][timeout:12];(node["amenity"~"restaurant|cafe|fast_food"]["cuisine"="' + cuisineVal + '"](' + around + ');way["amenity"~"restaurant|cafe|fast_food"]["cuisine"="' + cuisineVal + '"](' + around + '););out center 50;';
+    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="restaurant"]["cuisine"="' + cuisineVal + '"];out 30;';
   } else if (category === 'cafe') {
-    query = '[out:json][timeout:12];(node["amenity"="cafe"](' + around + ');way["amenity"="cafe"](' + around + '););out center 50;';
+    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="cafe"];out 30;';
   } else if (category === 'fast-food') {
-    query = '[out:json][timeout:12];(node["amenity"="fast_food"](' + around + ');way["amenity"="fast_food"](' + around + '););out center 50;';
+    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="fast_food"];out 30;';
   } else {
-    query = '[out:json][timeout:12];(node["amenity"~"^(restaurant|cafe|fast_food)$"](' + around + ');way["amenity"~"^(restaurant|cafe|fast_food)$"](' + around + '););out center 50;';
+    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="restaurant"];out 30;';
   }
 
-  try {
-    const data = await queryOverpass(query);
-    if (!data) return res.status(503).json({ error: '服務暫時不可用，請稍後再試' });
+  const endpoints = [
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass-api.de/api/interpreter',
+  ];
 
-    let places = data.elements.filter(el => el.tags && el.tags.name);
-    if (places.length === 0) {
-      return res.status(404).json({ error: '附近沒餐廳，試調大搜尋範圍' });
+  let data = null;
+  for (const ep of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      const r2 = await fetch(ep, {
+        method: 'POST',
+        body: q,
+        headers: { 'Content-Type': 'text/plain' },
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!r2.ok) continue;
+      const json = await r2.json();
+      if (json && json.elements && json.elements.length > 0) {
+        data = json;
+        break;
+      }
+    } catch (e) {
+      console.error('ep failed:', ep, e.message);
     }
-
-    const place = places[Math.floor(Math.random() * places.length)];
-    const tags = place.tags || {};
-    const name = tags['name:zh'] || tags.name || 'Unknown';
-    const address = [tags['addr:housenumber'], tags['addr:street'], tags['addr:district']]
-      .filter(Boolean).join(', ') || '地址不明';
-    const rating = (3.5 + Math.random() * 1.5).toFixed(1);
-
-    res.status(200).json({
-      name,
-      address,
-      rating,
-      cuisine: tags.cuisine || category || '',
-      phone: tags.phone || tags['contact:phone'] || '',
-      website: tags.website || tags['contact:website'] || '',
-      openriceUrl: 'https://www.openrice.com/zh/hongkong/restaurants?what=' + encodeURIComponent(name),
-      gmapsUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ' Hong Kong'),
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error: ' + error.message });
   }
+
+  if (!data || !data.elements) {
+    return res.status(503).json({ error: '服務暫時不可用，請稍後再試' });
+  }
+
+  const places = data.elements.filter(el => el.tags && el.tags.name);
+  if (places.length === 0) {
+    return res.status(404).json({ error: '附近沒餐廳，試調大搜尋範圍' });
+  }
+
+  const place = places[Math.floor(Math.random() * places.length)];
+  const tags = place.tags || {};
+  const name = tags['name:zh'] || tags.name || 'Unknown';
+  const address = [tags['addr:housenumber'], tags['addr:street'], tags['addr:district']]
+    .filter(Boolean).join(', ') || '地址不明';
+  const rating = (3.5 + Math.random() * 1.5).toFixed(1);
+
+  res.status(200).json({
+    name,
+    address,
+    rating,
+    cuisine: tags.cuisine || category || '',
+    phone: tags.phone || tags['contact:phone'] || '',
+    website: tags.website || tags['contact:website'] || '',
+    openriceUrl: 'https://www.openrice.com/zh/hongkong/restaurants?what=' + encodeURIComponent(name),
+    gmapsUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ' Hong Kong'),
+  });
 }
