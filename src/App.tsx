@@ -98,6 +98,7 @@ const logoUrl = "https://drive.google.com/uc?id=1hzsBQTTjJ1BzyNRjC9GkIE57YQmGNaj
 // --- Components ---
 const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite, onShare, reviews = [], onAddReview, t }: any) => {
   const [newReview, setNewReview] = useState('');
+  
   if (!res || res.error) return null;
   const isFavorite = favorites.some((f: any) => f.name === res.name);
 
@@ -110,7 +111,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
             <span className="text-blue-500">📍</span> {res.address}
           </p>
         </div>
-        <button
+        <button 
           onClick={() => onToggleFavorite(res)}
           className="text-2xl p-4 rounded-[1.5rem] bg-slate-900/50 hover:bg-slate-700/50 transition-all duration-300 active:scale-75 border border-white/5"
         >
@@ -128,17 +129,17 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <a
-          href={res.openriceUrl}
-          target="_blank"
+        <a 
+          href={res.openriceUrl} 
+          target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 py-4 bg-slate-900/80 rounded-2xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all border border-white/5 active:scale-95"
         >
           🥡 {t('openrice')}
         </a>
-        <a
-          href={res.gmapsUrl}
-          target="_blank"
+        <a 
+          href={res.gmapsUrl} 
+          target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 py-4 bg-slate-900/80 rounded-2xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all border border-white/5 active:scale-95"
         >
@@ -148,7 +149,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
 
       {isMain && (
         <div className="space-y-8">
-          <button
+          <button 
             onClick={() => onShare(res)}
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-5 rounded-2xl font-black text-xs transition-all shadow-2xl shadow-blue-900/40 uppercase tracking-[0.2em] border border-white/10 active:scale-[0.98]"
           >
@@ -177,14 +178,14 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
             </div>
 
             <div className="flex gap-3">
-              <input
-                type="text"
+              <input 
+                type="text" 
                 value={newReview}
                 onChange={(e) => setNewReview(e.target.value)}
                 placeholder={t('writeReview')}
                 className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
               />
-              <button
+              <button 
                 onClick={() => {
                   if (newReview.trim()) {
                     onAddReview(res.name, newReview);
@@ -209,14 +210,14 @@ export default function App() {
   const [lang, setLang] = useState('zh');
   const [region, setRegion] = useState('hk');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [favorites, setFavorites] = useState(() => {
+  const [result, setResult] = useState<any>(null);
+  const [favorites, setFavorites] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('favorites');
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
-  const [userReviews, setUserReviews] = useState(() => {
+  const [userReviews, setUserReviews] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('userReviews');
       return saved ? JSON.parse(saved) : [];
@@ -228,7 +229,7 @@ export default function App() {
   const [openNow, setOpenNow] = useState(true);
   const [isCuisineExpanded, setIsCuisineExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentCoords, setCurrentCoords] = useState(null);
+  const [currentCoords, setCurrentCoords] = useState<any>(null);
   const [slotText, setSlotText] = useState('');
 
   const slotOptions = ['正在分析您的口味...', '正在查看附近的美味...', '即將揭暁您的盲盒...', '正在挑選特色餐廳...', '尋找最佳食評中...'];
@@ -274,11 +275,15 @@ export default function App() {
         lng = currentCoords.lng;
       } else {
         // Fallback to GPS
-        const pos: any = await new Promise((res, rej) => {
-          navigator.geolocation.getCurrentPosition(res, rej);
-        });
-        lat = pos.coords.latitude;
-        lng = pos.coords.longitude;
+        try {
+          const pos: any = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          lat = pos.coords.latitude;
+          lng = pos.coords.longitude;
+        } catch (e) {
+          console.log('Using default Mong Kok coordinates');
+        }
       }
 
       const params = new URLSearchParams({
@@ -289,33 +294,27 @@ export default function App() {
         open_now: openNow.toString()
       });
 
-      try {
-        const res = await fetch(`/api/lucky-restaurant?${params.toString()}`);
-        const data = await res.json();
-        
-        setTimeout(() => {
-          clearInterval(interval);
-          setResult(data);
-          setLoading(false);
-          // Scroll to result
-          window.scrollTo({ top: 400, behavior: 'smooth' });
-        }, 1500);
-      } catch (err) {
+      const res = await fetch(`/api/lucky-restaurant?${params.toString()}`);
+      const data = await res.json();
+      
+      setTimeout(() => {
         clearInterval(interval);
+        setResult(data);
         setLoading(false);
-        alert('API 請求失敗');
-      }
+        // Scroll to result
+        window.scrollTo({ top: 400, behavior: 'smooth' });
+      }, 1500);
+
     } catch (err) {
       clearInterval(interval);
       setLoading(false);
-      // Fallback if search fails
-      alert('請輸入地點或開啟定位');
+      alert('搜尋失敗，請再試一次');
     }
   };
 
   const toggleFavorite = (res: any) => {
     if (!res || !res.name) return;
-    setFavorites((prev: any) => 
+    setFavorites((prev: any[]) => 
       prev.some((f: any) => f.name === res.name)
         ? prev.filter((f: any) => f.name !== res.name)
         : [...prev, res]
@@ -334,7 +333,7 @@ export default function App() {
 
   const addReview = (restaurantName: string, content: string) => {
     const review = { id: Date.now(), restaurantName, content, date: new Date().toLocaleDateString() };
-    setUserReviews((prev: any) => [review, ...prev]);
+    setUserReviews((prev: any[]) => [review, ...prev]);
   };
 
   const displayedCuisines = isCuisineExpanded ? CUISINES : CUISINES.slice(0, 6);
@@ -369,8 +368,8 @@ export default function App() {
               </div>
               
               <div className="relative">
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('searchPlace')}
@@ -389,7 +388,7 @@ export default function App() {
               <div className="flex flex-wrap gap-2">
                 <span className="text-slate-500 text-[10px] w-full mb-1 font-bold">{t('suggested')}:</span>
                 {LOCATIONS[region].slice(0, 4).map((loc: any) => (
-                  <button
+                  <button 
                     key={loc.name}
                     onClick={() => setSearchQuery(loc.name)}
                     className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border border-white/5"
@@ -416,7 +415,7 @@ export default function App() {
               
               <div className="grid grid-cols-3 gap-4">
                 {displayedCuisines.map(c => (
-                  <button
+                  <button 
                     key={c.id}
                     onClick={() => setSelectedCuisine(c.id)}
                     className={`flex flex-col items-center p-4 rounded-3xl border transition-all duration-300 active:scale-90 ${
@@ -441,10 +440,10 @@ export default function App() {
                   </h3>
                   <span className="text-blue-400 font-black text-sm">{distance}m</span>
                 </div>
-                <input
-                  type="range"
-                  min="200"
-                  max="2000"
+                <input 
+                  type="range" 
+                  min="200" 
+                  max="2000" 
                   step="100"
                   value={distance}
                   onChange={(e) => setDistance(parseInt(e.target.value))}
@@ -456,7 +455,7 @@ export default function App() {
                 <h3 className="text-white font-black text-xs uppercase tracking-widest flex items-center gap-3">
                   <span className="text-blue-500">🕒</span> {t('openNow')}
                 </h3>
-                <button
+                <button 
                   onClick={() => setOpenNow(!openNow)}
                   className={`w-14 h-7 rounded-full transition-all duration-300 relative border border-white/10 ${openNow ? 'bg-blue-600' : 'bg-slate-900'}`}
                 >
@@ -468,7 +467,7 @@ export default function App() {
             {/* Draw Button */}
             <div className="fixed bottom-32 left-0 right-0 px-6 z-20 pointer-events-none">
               <div className="max-w-md mx-auto pointer-events-auto">
-                <button
+                <button 
                   onClick={handleLottery}
                   disabled={loading}
                   className={`w-full py-7 rounded-[2rem] font-black text-lg transition-all shadow-2xl flex items-center justify-center gap-4 border border-white/10 ${
@@ -646,7 +645,7 @@ export default function App() {
             <span className="text-xl">🎰</span>
             <span className="text-[9px] font-black uppercase tracking-widest">{t('lottery')}</span>
           </button>
-          
+
           <button 
             onClick={() => setActiveTab('favorites')}
             className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'favorites' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
@@ -654,7 +653,7 @@ export default function App() {
             <span className="text-xl">❤️</span>
             <span className="text-[9px] font-black uppercase tracking-widest">{t('favorites')}</span>
           </button>
-          
+
           <button 
             onClick={() => setActiveTab('settings')}
             className={`flex flex-col items-center gap-2.5 py-4 px-6 rounded-[2rem] transition-all duration-300 ${activeTab === 'settings' ? 'bg-blue-500/10 text-blue-400 scale-110' : 'text-slate-500 hover:text-slate-300'}`}
