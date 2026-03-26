@@ -11,75 +11,77 @@ export default async function handler(req, res) {
   const latF = parseFloat(lat);
   const lngF = parseFloat(lng);
 
-  // Convert radius to degrees for bbox (approx)
+  // bbox: south,west,north,east
   const deg = r / 111320;
-  const bbox = (latF - deg) + ',' + (lngF - deg) + ',' + (latF + deg) + ',' + (lngF + deg);
+  const s = (latF - deg).toFixed(6);
+  const w = (lngF - deg).toFixed(6);
+  const n = (latF + deg).toFixed(6);
+  const e2 = (lngF + deg).toFixed(6);
 
   const cuisineMap = {
     'cha-chaan-teng': 'cha_chaan_teng',
-    'japanese': 'japanese',
-    'korean': 'korean',
-    'chinese': 'chinese',
-    'western': 'western',
-    'thai': 'thai',
-    'vietnamese': 'vietnamese',
-    'hotpot': 'hotpot',
-    'noodles': 'noodle',
-    'bbq': 'bbq',
-    'vegetarian': 'vegetarian',
-    'street-food': 'street_food',
-    'dessert': 'dessert',
-    'italian': 'italian',
-    'indian': 'indian',
-    'american': 'american',
+    'japanese': 'japanese', 'korean': 'korean', 'chinese': 'chinese',
+    'western': 'western', 'thai': 'thai', 'vietnamese': 'vietnamese',
+    'hotpot': 'hotpot', 'noodles': 'noodle', 'bbq': 'bbq',
+    'vegetarian': 'vegetarian', 'street-food': 'street_food',
+    'dessert': 'dessert', 'italian': 'italian', 'indian': 'indian', 'american': 'american',
   };
-
   const cuisineVal = cuisineMap[category];
+
+  let amenity = 'restaurant';
+  if (category === 'cafe') amenity = 'cafe';
+  if (category === 'fast-food') amenity = 'fast_food';
 
   let q;
   if (cuisineVal) {
-    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="restaurant"]["cuisine"="' + cuisineVal + '"];out 30;';
-  } else if (category === 'cafe') {
-    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="cafe"];out 30;';
-  } else if (category === 'fast-food') {
-    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="fast_food"];out 30;';
+    q = '[out:json][timeout:9][bbox:' + s + ',' + w + ',' + n + ',' + e2 + '];';
+    q += 'node["amenity"="restaurant"]["cuisine"="' + cuisineVal + '"];out 30;';
   } else {
-    q = '[out:json][timeout:8][bbox:' + bbox + '];node["amenity"="restaurant"];out 30;';
+    q = '[out:json][timeout:9][bbox:' + s + ',' + w + ',' + n + ',' + e2 + '];';
+    q += 'node["amenity"="' + amenity + '"];out 30;';
   }
 
-  const endpoints = [
+  const ENDPOINTS = [
     'https://overpass.kumi.systems/api/interpreter',
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
     'https://overpass-api.de/api/interpreter',
   ];
 
-  let data = null;
-  for (const ep of endpoints) {
+  let elements = null;
+  for (const ep of ENDPOINTS) {
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 8000);
-      const r2 = await fetch(ep, {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8500);
+      const resp = await fetch(ep, {
         method: 'POST',
         body: q,
-        headers: { 'Content-Type': 'text/plain' },
-        signal: controller.signal,
+        headers: {
+          'Content-Type': 'text/plain',
+          'User-Agent': 'hk-restaurant-lottery/1.0'
+        },
+        signal: ctrl.signal,
       });
-      clearTimeout(timer);
-      if (!r2.ok) continue;
-      const json = await r2.json();
-      if (json && json.elements && json.elements.length > 0) {
-        data = json;
+      clearTimeout(t);
+      if (!resp.ok) { console.error(ep, resp.status); continue; }
+      const json = await resp.json();
+      if (json.elements && json.elements.length > 0) {
+        elements = json.elements;
+        break;
+      } else if (json.elements) {
+        // Got valid response but empty - don't try other endpoints for same query
+        elements = [];
         break;
       }
     } catch (e) {
-      console.error('ep failed:', ep, e.message);
+      console.error('Overpass failed:', ep, e.message);
     }
   }
 
-  if (!data || !data.elements) {
+  if (elements === null) {
     return res.status(503).json({ error: '服務暫時不可用，請稍後再試' });
   }
 
-  const places = data.elements.filter(el => el.tags && el.tags.name);
+  const places = elements.filter(el => el.tags && el.tags.name);
   if (places.length === 0) {
     return res.status(404).json({ error: '附近沒餐廳，試調大搜尋範圍' });
   }
@@ -91,10 +93,8 @@ export default async function handler(req, res) {
     .filter(Boolean).join(', ') || '地址不明';
   const rating = (3.5 + Math.random() * 1.5).toFixed(1);
 
-  res.status(200).json({
-    name,
-    address,
-    rating,
+  return res.status(200).json({
+    name, address, rating,
     cuisine: tags.cuisine || category || '',
     phone: tags.phone || tags['contact:phone'] || '',
     website: tags.website || tags['contact:website'] || '',
