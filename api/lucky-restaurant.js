@@ -20,6 +20,12 @@ const RESTAURANTS = [
   {name: '澤豐園', cuisine: 'chinese', address: '台灣街', lat: 22.3205, lng: 114.1675, district: 'Sham Shui Po'},
   {name: '蓮香樓', cuisine: 'chinese', address: '中環威陵道26號', lat: 22.2823, lng: 114.1540, district: 'Central'},
   {name: 'Madame Fu', cuisine: 'chinese', address: 'Central', lat: 22.2826, lng: 114.1551, district: 'Central'},
+  {name: '沙田美食', cuisine: 'cha-chaan-teng', address: 'Sha Tin', lat: 22.3817, lng: 114.1916, district: 'Sha Tin'},
+  {name: '大埔餐廳', cuisine: 'chinese', address: 'Tai Po', lat: 22.4507, lng: 114.1646, district: 'Tai Po'},
+  {name: '屯門美食', cuisine: 'noodles', address: 'Tuen Mun', lat: 22.3911, lng: 113.9757, district: 'Tuen Mun'},
+  {name: '荃灣茶餐廳', cuisine: 'cha-chaan-teng', address: 'Tsuen Wan', lat: 22.3693, lng: 114.1218, district: 'Tsuen Wan'},
+  {name: '元朗食店', cuisine: 'chinese', address: 'Yuen Long', lat: 22.4446, lng: 114.0292, district: 'Yuen Long'},
+  {name: '上水餐廳', cuisine: 'cha-chaan-teng', address: 'Sheung Shui', lat: 22.5019, lng: 114.1277, district: 'Sheung Shui'},
 ];
 
 // Calculate distance between two coordinates (Haversine formula)
@@ -27,68 +33,56 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c * 1000; // Return in meters
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  if (req.method === 'OPTIONS') { res.status(200).end(); return; }
+  const { lat, lng, radius = 1000, category = 'any' } = req.query;
 
-  const { lat, lng, radius, category } = req.query;
-  if (!lat || !lng) return res.status(400).json({ error: '需要座標' });
+  if (!lat || !lng) {
+    return res.status(400).json({ error: 'Missing location parameters' });
+  }
 
   const userLat = parseFloat(lat);
   const userLng = parseFloat(lng);
-  const maxRadius = parseFloat(radius) || 3000;
+  const searchRadius = parseInt(radius);
 
-  // Filter restaurants by distance and category
-  let nearby = RESTAURANTS.map(r => ({
-    ...r,
-    distance: calculateDistance(userLat, userLng, r.lat, r.lng)
-  })).filter(r => r.distance <= maxRadius);
+  // Filter restaurants by distance
+  let nearby = RESTAURANTS.filter(r => {
+    const distance = calculateDistance(userLat, userLng, r.lat, r.lng);
+    return distance <= searchRadius;
+  });
 
   // Filter by category if specified
-  if (category && category !== 'all') {
-    const filtered = nearby.filter(r => r.cuisine === category);
-    if (filtered.length > 0) nearby = filtered;
+  if (category && category !== 'any' && category !== 'all') {
+    nearby = nearby.filter(r => r.cuisine === category);
   }
 
   if (nearby.length === 0) {
-    return res.status(404).json({ error: '附近沒餐廳，試調大搜尋範圍' });
+    return res.status(200).json({ error: 'No restaurants found nearby' });
   }
 
-  // Sort by distance
-  nearby.sort((a, b) => a.distance - b.distance);
-
-  // Pick main restaurant randomly from top 10 closest
-  const topRestaurants = nearby.slice(0, Math.min(10, nearby.length));
-  const mainIdx = Math.floor(Math.random() * topRestaurants.length);
-  const main = topRestaurants[mainIdx];
-
-  // Get 2 alternatives from remaining
-  const alternatives = nearby.filter((r, i) => r.name !== main.name).slice(0, 2);
-
-  const formatRestaurant = (r) => ({
-    name: r.name,
-    address: r.address,
-    district: r.district,
-    rating: (3.5 + Math.random() * 1.5).toFixed(1),
-    cuisine: r.cuisine,
-    distance: Math.round(r.distance),
-    lat: r.lat,
-    lng: r.lng,
-    openriceUrl: 'https://www.openrice.com/zh/hongkong/restaurants?what=' + encodeURIComponent(r.name),
-    gmapsUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.name + ' Hong Kong'),
-  });
+  // Pick a random restaurant
+  const main = nearby[Math.floor(Math.random() * nearby.length)];
+  
+  // Get 2-3 alternatives
+  const alternatives = nearby
+    .filter(r => r.name !== main.name)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
 
   return res.status(200).json({
-    main: formatRestaurant(main),
-    alternatives: alternatives.map(formatRestaurant)
+    ...main,
+    openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(main.name)}`,
+    gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(main.name + ' ' + main.address)}`,
+    alternatives: alternatives.map(alt => ({
+      ...alt,
+      openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(alt.name)}`,
+      gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alt.name + ' ' + alt.address)}`
+    }))
   });
 }
