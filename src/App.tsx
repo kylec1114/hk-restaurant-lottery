@@ -124,6 +124,7 @@ const logoUrl = "https://drive.google.com/uc?id=1hzsBQTTjJ1BzyNRjC9GkIE57YQmGNaj
 // --- Components ---
 const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite, onShare, reviews = [], onAddReview, t }: any) => {
   const [newReview, setNewReview] = useState('');
+  
   if (!res || res.error) return null;
   const isFavorite = favorites.some((f: any) => f.name === res.name);
 
@@ -136,7 +137,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
             <span className="text-blue-400">📍</span> {res.address}
           </p>
         </div>
-        <button
+        <button 
           onClick={() => onToggleFavorite(res)}
           className="text-2xl p-4 rounded-[1.5rem] bg-slate-900/50 hover:bg-slate-700/50 transition-all duration-300 active:scale-75 border border-white/5"
         >
@@ -154,17 +155,17 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <a
-          href={res.openriceUrl}
-          target="_blank"
+        <a 
+          href={res.openriceUrl} 
+          target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 bg-slate-900/50 hover:bg-slate-800 text-slate-300 py-4 rounded-2xl text-[10px] font-black transition-all border border-white/5 uppercase tracking-widest"
         >
           🥡 {t('openrice')}
         </a>
-        <a
-          href={res.gmapsUrl}
-          target="_blank"
+        <a 
+          href={res.gmapsUrl} 
+          target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 bg-slate-900/50 hover:bg-slate-800 text-slate-300 py-4 rounded-2xl text-[10px] font-black transition-all border border-white/5 uppercase tracking-widest"
         >
@@ -174,7 +175,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
 
       {isMain && (
         <div className="space-y-6">
-          <button
+          <button 
             onClick={() => onShare(res)}
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-5 rounded-2xl font-black text-xs transition-all shadow-2xl shadow-blue-900/40 uppercase tracking-[0.2em] border border-white/10 active:scale-[0.98]"
           >
@@ -201,14 +202,14 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
             </div>
 
             <div className="flex gap-2">
-              <input
-                type="text"
+              <input 
+                type="text" 
                 value={newReview}
                 onChange={(e) => setNewReview(e.target.value)}
                 placeholder={t('writeReview')}
                 className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
               />
-              <button
+              <button 
                 onClick={() => {
                   if (newReview.trim()) {
                     onAddReview(res.name, newReview);
@@ -250,7 +251,6 @@ export default function App() {
       return [];
     }
   });
-
   const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [distance, setDistance] = useState(800);
   const [openNow, setOpenNow] = useState(true);
@@ -331,7 +331,6 @@ export default function App() {
         setLoading(false);
         window.scrollTo({ top: 400, behavior: 'smooth' });
       }, 1500);
-
     } catch (err) {
       clearInterval(interval);
       setLoading(false);
@@ -404,8 +403,8 @@ export default function App() {
                 <span className="ml-auto bg-slate-800 px-2 py-0.5 rounded text-blue-400">{region.toUpperCase()}</span>
               </h3>
               <div className="relative group">
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('searchPlace')}
@@ -418,7 +417,7 @@ export default function App() {
               <div className="flex flex-wrap gap-2 mt-4">
                 <span className="text-[9px] text-slate-600 font-bold uppercase py-1.5">{t('suggested')}:</span>
                 {(LOCATIONS[region] as any[]).slice(0, 4).map((loc: any) => (
-                  <button
+                  <button 
                     key={loc.name}
                     onClick={() => setSearchQuery(loc.name)}
                     className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border border-white/5"
@@ -435,7 +434,7 @@ export default function App() {
                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <span className="text-blue-400">🍱</span> {t('cuisine')}
                 </h3>
-                <button
+                <button 
                   onClick={() => setIsCuisineExpanded(!isCuisineExpanded)}
                   className="text-blue-400 text-[9px] font-black hover:text-blue-300 bg-blue-500/10 px-4 py-1.5 rounded-full uppercase tracking-widest transition-all"
                 >
@@ -444,12 +443,12 @@ export default function App() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {displayedCuisines.map(c => (
-                  <button
+                  <button 
                     key={c.id}
                     onClick={() => setSelectedCuisine(c.id)}
                     className={`flex flex-col items-center p-4 rounded-3xl border transition-all duration-300 active:scale-90 ${
-                      selectedCuisine === c.id
-                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40'
+                      selectedCuisine === c.id 
+                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40' 
                         : 'bg-slate-900/50 border-white/5 text-slate-400'
                     }`}
                   >
@@ -469,22 +468,21 @@ export default function App() {
                   </h3>
                   <span className="text-blue-400 text-xs font-black">{distance}m</span>
                 </div>
-                <input
-                  type="range"
-                  min="200"
-                  max="2000"
-                  step="100"
+                <input 
+                  type="range" 
+                  min="200" 
+                  max="2000" 
+                  step="100" 
                   value={distance}
                   onChange={(e) => setDistance(parseInt(e.target.value))}
                   className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
               </div>
-
               <div className="flex justify-between items-center">
                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                   <span className="text-blue-400">🕒</span> {t('openNow')}
                 </h3>
-                <button
+                <button 
                   onClick={() => setOpenNow(!openNow)}
                   className={`w-14 h-7 rounded-full transition-all duration-300 relative border border-white/10 ${openNow ? 'bg-blue-600' : 'bg-slate-900'}`}
                 >
@@ -495,7 +493,7 @@ export default function App() {
 
             {/* Draw Button */}
             <div className="relative pt-4">
-              <button
+              <button 
                 onClick={handleLottery}
                 disabled={loading}
                 className={`w-full py-8 rounded-[2.5rem] font-black text-lg transition-all duration-500 shadow-2xl relative overflow-hidden group ${
@@ -530,7 +528,7 @@ export default function App() {
                   <div className="bg-red-500/10 border border-red-500/20 rounded-[2.5rem] p-12 text-center">
                     <div className="text-4xl mb-6">🍽️</div>
                     <p className="text-slate-400 text-sm mb-6 font-medium leading-relaxed">{t('noResults')}</p>
-                    <button
+                    <button 
                       onClick={() => setDistance(2000)}
                       className="text-red-400 text-[10px] font-black uppercase tracking-widest hover:underline"
                     >
@@ -539,11 +537,11 @@ export default function App() {
                   </div>
                 ) : (
                   <>
-                    <RestaurantCard
-                      res={result}
-                      isMain={true}
-                      favorites={favorites}
-                      onToggleFavorite={toggleFavorite}
+                    <RestaurantCard 
+                      res={result} 
+                      isMain={true} 
+                      favorites={favorites} 
+                      onToggleFavorite={toggleFavorite} 
                       onShare={shareCard}
                       reviews={userReviews}
                       onAddReview={addReview}
@@ -557,11 +555,11 @@ export default function App() {
                         </h3>
                         <div className="space-y-4">
                           {(result.alternatives as any[]).map((alt: any) => (
-                            <RestaurantCard
-                              key={alt.name}
-                              res={alt}
-                              favorites={favorites}
-                              onToggleFavorite={toggleFavorite}
+                            <RestaurantCard 
+                              key={alt.name} 
+                              res={alt} 
+                              favorites={favorites} 
+                              onToggleFavorite={toggleFavorite} 
                               t={t}
                             />
                           ))}
@@ -605,7 +603,7 @@ export default function App() {
                     </div>
                     <div className="flex gap-2">
                       <a href={fav.gmapsUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 text-slate-400 rounded-2xl hover:text-white transition-all border border-white/5">🗺️</a>
-                      <button
+                      <button 
                         onClick={() => toggleFavorite(fav)}
                         className="p-3 bg-slate-900 text-blue-400 rounded-2xl hover:scale-110 transition-all border border-white/5 text-lg"
                       >
@@ -627,7 +625,7 @@ export default function App() {
               <section>
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">{t('region')}</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <button
+                  <button 
                     onClick={() => setRegion('hk')}
                     className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
                       region === 'hk' 
@@ -637,7 +635,7 @@ export default function App() {
                   >
                     Hong Kong 🇭🇰
                   </button>
-                  <button
+                  <button 
                     onClick={() => setRegion('tw')}
                     className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
                       region === 'tw' 
@@ -653,7 +651,7 @@ export default function App() {
               <section>
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">{t('langSelect')}</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <button
+                  <button 
                     onClick={() => setLang('zh')}
                     className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
                       lang === 'zh' 
@@ -663,7 +661,7 @@ export default function App() {
                   >
                     繁體中文
                   </button>
-                  <button
+                  <button 
                     onClick={() => setLang('en')}
                     className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
                       lang === 'en' 
@@ -687,7 +685,7 @@ export default function App() {
           { id: 'favorites', icon: '❤️', label: t('favorites') },
           { id: 'settings', icon: '⚙️', label: t('settings') }
         ].map(item => (
-          <button
+          <button 
             key={item.id}
             onClick={() => setActiveTab(item.id)}
             className={`flex flex-col items-center gap-1.5 px-6 py-3 rounded-3xl transition-all ${
