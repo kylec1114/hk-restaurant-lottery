@@ -20,7 +20,7 @@ const CUISINES = [
   { id: 'street-food', name: '小食', icon: '🍡' },
 ];
 
-const LOCATIONS: any = {
+const LOCATIONS: Record<string, any[]> = {
   hk: [
     { name: '旺角', lat: 22.3193, lng: 114.1694 },
     { name: '尖沙咀', lat: 22.2988, lng: 114.1722 },
@@ -184,14 +184,14 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           <div className="pt-6 border-t border-white/5">
             <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
               <span>{t('reviews')}</span>
-              <span className="bg-slate-800 px-2 py-0.5 rounded-md text-slate-400">{reviews.filter((r: any) => r.restaurantName === res.name).length}</span>
+              <span className="bg-slate-800 px-2 py-0.5 rounded-md text-slate-400">{(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length}</span>
             </h4>
             
             <div className="space-y-3 mb-6 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-              {reviews.filter((r: any) => r.restaurantName === res.name).length === 0 ? (
+              {(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length === 0 ? (
                 <div className="text-slate-600 text-[10px] py-4 text-center italic">{t('noReviews')}</div>
               ) : (
-                reviews.filter((r: any) => r.restaurantName === res.name).map((r: any) => (
+                (reviews as any[]).filter((r: any) => r.restaurantName === res.name).map((r: any) => (
                   <div key={r.id} className="bg-slate-900/30 p-4 rounded-2xl border border-white/5">
                     <p className="text-slate-300 text-xs leading-relaxed">{r.content}</p>
                     <span className="text-[8px] text-slate-600 mt-2 block font-bold">{r.date}</span>
@@ -233,8 +233,8 @@ export default function App() {
   const [lang, setLang] = useState('zh');
   const [region, setRegion] = useState('hk');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [favorites, setFavorites] = useState(() => {
+  const [result, setResult] = useState<any>(null);
+  const [favorites, setFavorites] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('favorites');
       return saved ? JSON.parse(saved) : [];
@@ -242,7 +242,7 @@ export default function App() {
       return [];
     }
   });
-  const [userReviews, setUserReviews] = useState(() => {
+  const [userReviews, setUserReviews] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('userReviews');
       return saved ? JSON.parse(saved) : [];
@@ -256,8 +256,10 @@ export default function App() {
   const [openNow, setOpenNow] = useState(true);
   const [isCuisineExpanded, setIsCuisineExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentCoords, setCurrentCoords] = useState(null);
+  const [currentCoords, setCurrentCoords] = useState<any>(null);
   const [slotText, setSlotText] = useState('');
+
+  const t = (key: string) => (TRANSLATIONS[lang] as any)?.[key] || key;
 
   const slotOptions = useMemo(() => [
     t('slot1'), t('slot2'), t('slot3'), t('slot4'), t('slot5')
@@ -280,8 +282,6 @@ export default function App() {
     }
   }, []);
 
-  const t = (key: string) => TRANSLATIONS[lang]?.[key] || key;
-
   const handleLottery = async () => {
     setLoading(true);
     setResult(null);
@@ -294,7 +294,7 @@ export default function App() {
       let lat = 22.3193, lng = 114.1694; // Default Mong Kok
       
       if (searchQuery) {
-        const found = LOCATIONS[region].find((l: any) => l.name.includes(searchQuery));
+        const found = (LOCATIONS[region] as any[]).find((l: any) => l.name.includes(searchQuery));
         if (found) {
           lat = found.lat;
           lng = found.lng;
@@ -417,7 +417,7 @@ export default function App() {
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
                 <span className="text-[9px] text-slate-600 font-bold uppercase py-1.5">{t('suggested')}:</span>
-                {LOCATIONS[region].slice(0, 4).map((loc: any) => (
+                {(LOCATIONS[region] as any[]).slice(0, 4).map((loc: any) => (
                   <button
                     key={loc.name}
                     onClick={() => setSearchQuery(loc.name)}
@@ -556,7 +556,7 @@ export default function App() {
                           <span className="text-blue-400">🍱</span> {t('alternatives')}
                         </h3>
                         <div className="space-y-4">
-                          {result.alternatives.map((alt: any) => (
+                          {(result.alternatives as any[]).map((alt: any) => (
                             <RestaurantCard
                               key={alt.name}
                               res={alt}
