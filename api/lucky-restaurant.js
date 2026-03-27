@@ -1,14 +1,14 @@
 // Foursquare Places API handler
 export default async function handler(req, res) {
-  const { lat, lng, radius = 1000, category = 'any', open_now = 'false' } = req.query;
-  
+  const { lat, lng, category = 'all', open_now = 'false' } = req.query;
+
   if (!lat || !lng) {
     return res.status(400).json({ error: 'Missing location parameters' });
   }
 
   const userLat = parseFloat(lat);
   const userLng = parseFloat(lng);
-  const searchRadius = parseInt(radius);
+  const searchRadius = 1500; // Fixed 1500m radius
 
   // Map our cuisine categories to Foursquare categories
   const categoryMap = {
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   try {
     // Foursquare Places API v3 - Search endpoint
     const apiKey = process.env.FOURSQUARE_API_KEY;
-    
+
     if (!apiKey) {
       return res.status(500).json({ error: 'Foursquare API key not configured' });
     }
@@ -54,63 +54,70 @@ export default async function handler(req, res) {
       params.append('open_now', 'true');
     }
 
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
     const response = await fetch(
       `https://api.foursquare.com/v3/places/search?${params.toString()}`,
       {
+        method: 'GET',
         headers: {
-          'Authorization': apiKey,
-          'Accept': 'application/json'
-        }
+          'Accept': 'application/json',
+          'Authorization': apiKey
+        },
+        signal: controller.signal
       }
     );
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      console.error('Foursquare API error:', response.status, await response.text());
-      return res.status(response.status).json({ error: 'Foursquare API request failed' });
+      throw new Error(`Foursquare API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const places = data.results || [];
 
-    if (places.length === 0) {
-      return res.status(200).json({ error: 'No restaurants found nearby' });
+    if (!data.results || data.results.length === 0) {
+      return res.status(200).json({ error: 'No restaurants found' });
     }
 
-    // Pick a random main restaurant
-    const mainPlace = places[Math.floor(Math.random() * places.length)];
+    // Pick a random restaurant
+    const randomIndex = Math.floor(Math.random() * Math.min(data.results.length, 10));
+    const place = data.results[randomIndex];
 
-    // Get 2-3 alternatives
-    const alternatives = places
-      .filter(p => p.fsq_id !== mainPlace.fsq_id)
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3);
+    // Get alternatives (next 3 restaurants)
+    const alternatives = data.results
+      .filter((p, idx) => idx !== randomIndex)
+      .slice(0, 3)
+      .map(p => ({
+        name: p.name,
+        address: p.location?.formatted_address || p.location?.address || 'Address unavailable',
+        district: p.location?.locality || 'HK',
+        rating: (p.rating ? p.rating.toFixed(1) : null),
+        openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(p.name)}`,
+        gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + ' ' + (p.location?.address || ''))}`
+      }));
 
-    // Format main restaurant
-    const formatPlace = (place) => {
-      const address = place.location?.formatted_address || 
-                     [place.location?.address, place.location?.locality].filter(Boolean).join(', ') ||
-                     'Address unavailable';
-      
-      return {
-        name: place.name,
-        address: address,
-        cuisine: category,
-        lat: place.geocodes?.main?.latitude,
-        lng: place.geocodes?.main?.longitude,
-        rating: place.rating ? (place.rating / 2).toFixed(1) : '4.0', // Convert 10-scale to 5-scale
-        district: place.location?.locality || place.location?.region || 'Hong Kong',
-        openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(place.name)}`,
-        gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ' ' + address)}`,
-      };
+    const restaurant = {
+      name: place.name,
+      address: place.location?.formatted_address || place.location?.address || 'Address unavailable',
+      district: place.location?.locality || 'HK',
+      rating: (place.rating ? place.rating.toFixed(1) : null),
+      openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(place.name)}`,
+      gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ' ' + (place.location?.address || ''))}`
     };
 
     return res.status(200).json({
-      restaurant: formatPlace(mainPlace),
-      alternatives: alternatives.map(formatPlace)
+      restaurant,
+      alternatives
     });
 
-  } catch (error) {
-    console.error('Error calling Foursquare API:', error);
-    return res.status(500).json({ error: 'Internal server error', details: error.message });
+  } catch (err) {
+    console.error('API Error:', err);
+    if (err.name === 'AbortError') {
+      return res.status(408).json({ error: 'Request timeout', details: 'API call took too long' });
+    }
+    return res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 }
