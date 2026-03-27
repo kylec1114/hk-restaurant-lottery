@@ -42,6 +42,7 @@ const TRANSLATIONS: any = {
     draw: '撳我抽盲盒！',
     cuisine: '想食咩?',
     distance: '行幾遠?',
+    location: '喺邊度食?',
     rating: '最低評分',
     openNow: '營業中',
     favorites: '收藏庫',
@@ -82,6 +83,7 @@ const TRANSLATIONS: any = {
     draw: 'Draw Now!',
     cuisine: 'What to eat?',
     distance: 'How far?',
+    location: 'Where to eat?',
     rating: 'Min Rating',
     openNow: 'Open Now',
     favorites: 'Favorites',
@@ -118,15 +120,10 @@ const TRANSLATIONS: any = {
   }
 };
 
-const logoUrl = "https://drive.google.com/uc?id=1hzsBQTTjJ1BzyNRjC9GkIE57YQmGNajO";
-
-// --- Components ---
 const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite, onShare, reviews = [], onAddReview, t }: any) => {
   const [newReview, setNewReview] = useState('');
-  
   if (!res || res.error) return null;
   const isFavorite = favorites.some((f: any) => f.name === res.name);
-
   return (
     <div className={`bg-white border border-slate-200 rounded-[2.5rem] p-8 transition-all duration-500 hover:shadow-xl ${isMain ? 'shadow-2xl active:scale-[0.99]' : ''}`}>
       <div className="flex justify-between items-start mb-6">
@@ -143,7 +140,6 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           {isFavorite ? '❤️' : '🤍'}
         </button>
       </div>
-
       <div className="flex gap-4 mb-8">
         <div className="bg-green-500/10 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-green-200">
           🟢 {t('openNow')}
@@ -152,26 +148,14 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           ⭐ {res.rating || '4.2'}
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <a 
-          href={res.openriceUrl} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-4 rounded-2xl text-[10px] font-black transition-all border border-slate-200 uppercase tracking-widest"
-        >
+        <a href={res.openriceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-4 rounded-2xl text-[10px] font-black transition-all border border-slate-200 uppercase tracking-widest">
           🥡 {t('openrice')}
         </a>
-        <a 
-          href={res.gmapsUrl} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-4 rounded-2xl text-[10px] font-black transition-all border border-slate-200 uppercase tracking-widest"
-        >
+        <a href={res.gmapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-4 rounded-2xl text-[10px] font-black transition-all border border-slate-200 uppercase tracking-widest">
           🗺️ {t('gmaps')}
         </a>
       </div>
-
       {isMain && (
         <div className="space-y-6">
           <button 
@@ -180,13 +164,11 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           >
             {t('share')}
           </button>
-
           <div className="pt-6 border-t border-slate-100">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
               <span>{t('reviews')}</span>
               <span className="bg-slate-100 px-2 py-0.5 rounded-md text-slate-500">{(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length}</span>
             </h4>
-            
             <div className="space-y-3 mb-6 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
               {(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length === 0 ? (
                 <div className="text-slate-400 text-[10px] py-4 text-center italic">{t('noReviews')}</div>
@@ -199,26 +181,9 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
                 ))
               )}
             </div>
-
             <div className="flex gap-2">
-              <input 
-                type="text" 
-                value={newReview}
-                onChange={(e) => setNewReview(e.target.value)}
-                placeholder={t('writeReview')}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-orange-500/50 transition-all focus:ring-4 focus:ring-orange-500/10"
-              />
-              <button 
-                onClick={() => {
-                  if (newReview.trim()) {
-                    onAddReview(res.name, newReview);
-                    setNewReview('');
-                  }
-                }}
-                className="bg-orange-500 hover:bg-orange-400 text-white w-14 rounded-2xl transition-all shadow-lg active:scale-90 flex items-center justify-center"
-              >
-                🚀
-              </button>
+              <input type="text" value={newReview} onChange={(e) => setNewReview(e.target.value)} placeholder={t('writeReview')} className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-orange-500/50 transition-all focus:ring-4 focus:ring-orange-500/10" />
+              <button onClick={() => { if (newReview.trim()) { onAddReview(res.name, newReview); setNewReview(''); } }} className="bg-orange-500 hover:bg-orange-400 text-white w-14 rounded-2xl transition-all shadow-lg active:scale-90 flex items-center justify-center">🚀</button>
             </div>
           </div>
         </div>
@@ -227,208 +192,125 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
   );
 };
 
-// --- Main Application ---
 export default function App() {
   const [activeTab, setActiveTab] = useState('lottery');
   const [lang, setLang] = useState('zh');
   const [region, setRegion] = useState('hk');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [favorites, setFavorites] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('favorites');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [userReviews, setUserReviews] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('userReviews');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [favorites, setFavorites] = useState<any[]>(() => { try { const saved = localStorage.getItem('favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
+  const [userReviews, setUserReviews] = useState<any[]>(() => { try { const saved = localStorage.getItem('userReviews'); return saved ? JSON.parse(saved) : []; } catch { return []; } });
   const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [distance, setDistance] = useState(1000);
-  const [openNow, setOpenNow] = useState(true);
   const [isCuisineExpanded, setIsCuisineExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentCoords, setCurrentCoords] = useState<any>(null);
   const [slotText, setSlotText] = useState('');
-
+  
   const t = (key: string) => (TRANSLATIONS[lang] as any)?.[key] || key;
-
-  const slotOptions = useMemo(() => [
-    t('slot1'), t('slot2'), t('slot3'), t('slot4'), t('slot5')
-  ], [lang]);
-
-  useEffect(() => {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }, [favorites]);
-
-  useEffect(() => {
-    localStorage.setItem('userReviews', JSON.stringify(userReviews));
-  }, [userReviews]);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setCurrentCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.log('Geolocation disabled or failed')
-      );
-    }
-  }, []);
-
+  const slotOptions = useMemo(() => [t('slot1'), t('slot2'), t('slot3'), t('slot4'), t('slot5')], [lang]);
+  
+  useEffect(() => { localStorage.setItem('favorites', JSON.stringify(favorites)); }, [favorites]);
+  useEffect(() => { localStorage.setItem('userReviews', JSON.stringify(userReviews)); }, [userReviews]);
+  
   const handleLottery = async () => {
     setLoading(true);
     setResult(null);
-    
-    const interval = setInterval(() => {
-      setSlotText(slotOptions[Math.floor(Math.random() * slotOptions.length)]);
-    }, 200);
-
+    const interval = setInterval(() => { setSlotText(slotOptions[Math.floor(Math.random() * slotOptions.length)]); }, 200);
     try {
-      let lat = 22.3193, lng = 114.1694; // Default Mong Kok
-      
+      let lat = 22.3193, lng = 114.1694;
       if (searchQuery) {
-        const found = (LOCATIONS[region] as any[]).find((l: any) => l.name.includes(searchQuery));
-        if (found) {
-          lat = found.lat;
-          lng = found.lng;
-        }
-      } else if (currentCoords) {
-        lat = currentCoords.lat;
-        lng = currentCoords.lng;
+        const found = (LOCATIONS[region] as any[]).find((l: any) => l.name === searchQuery);
+        if (found) { lat = found.lat; lng = found.lng; }
       }
-
-      const params = new URLSearchParams({
-        lat: lat.toString(),
-        lng: lng.toString(),
-        radius: distance.toString(),
-        category: selectedCuisine,
-        open_now: openNow.toString()
-      });
-
+      const params = new URLSearchParams({ lat: lat.toString(), lng: lng.toString(), radius: distance.toString(), category: selectedCuisine, open_now: 'true' });
       const res = await fetch(`/api/lucky-restaurant?${params.toString()}`);
       const data = await res.json();
-
-      setTimeout(() => {
-        clearInterval(interval);
-        setResult(data);
-        setLoading(false);
-        window.scrollTo({ top: 400, behavior: 'smooth' });
-      }, 1500);
-    } catch (err) {
-      clearInterval(interval);
-      setLoading(false);
-      alert(t('searchFailed'));
-    }
+      setTimeout(() => { clearInterval(interval); setResult(data); setLoading(false); window.scrollTo({ top: 500, behavior: 'smooth' }); }, 1500);
+    } catch (err) { clearInterval(interval); setLoading(false); alert(t('searchFailed')); }
   };
 
-  const toggleFavorite = (res: any) => {
-    if (!res || !res.name) return;
-    setFavorites((prev: any[]) => 
-      prev.some((f: any) => f.name === res.name)
-        ? prev.filter((f: any) => f.name !== res.name)
-        : [...prev, res]
-    );
-  };
-
+  const toggleFavorite = (res: any) => { if (!res || !res.name) return; setFavorites((prev: any[]) => prev.some((f: any) => f.name === res.name) ? prev.filter((f: any) => f.name !== res.name) : [...prev, res]); };
   const shareCard = (res: any) => {
-    const text = lang === 'zh' 
-      ? `我抽到呢間餐廳：${res.name}！📍 地址：${res.address}。一齊去食？`
-      : `I drew this restaurant: ${res.name}! 📍 Address: ${res.address}. Let's go?`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: t('title'),
-        text,
-        url: window.location.href
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(text);
-      alert(t('copied'));
-    }
+    const text = lang === 'zh' ? `我抽到呢間餐廳：${res.name}！📍 地址：${res.address}。一齊去食？` : `I drew this restaurant: ${res.name}! 📍 Address: ${res.address}. Let's go?`;
+    if (navigator.share) { navigator.share({ title: t('title'), text, url: window.location.href }).catch(console.error); } else { navigator.clipboard.writeText(text); alert(t('copied')); }
   };
-
-  const addReview = (restaurantName: string, content: string) => {
-    const review = {
-      id: Date.now(),
-      restaurantName,
-      content,
-      date: new Date().toLocaleDateString()
-    };
-    setUserReviews((prev: any[]) => [review, ...prev]);
-  };
+  const addReview = (restaurantName: string, content: string) => { const review = { id: Date.now(), restaurantName, content, date: new Date().toLocaleDateString() }; setUserReviews((prev: any[]) => [review, ...prev]); };
 
   const displayedCuisines = isCuisineExpanded ? CUISINES : CUISINES.slice(0, 10);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans">
-      {/* Header */}
       <header className="bg-orange-500 p-8 pb-12 text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-white/5 skew-y-6 transform translate-y-12" />
         <div className="relative flex flex-col items-center gap-4">
-           <div className="text-5xl drop-shadow-lg">🎲</div>
-           <h1 className="text-4xl font-black text-white tracking-tight">{t('title')}</h1>
-           <p className="text-orange-50 text-sm font-bold opacity-90">{t('subtitle')}</p>
+          <div className="text-5xl drop-shadow-lg">🎲</div>
+          <h1 className="text-4xl font-black text-white tracking-tight">{t('title')}</h1>
+          <p className="text-orange-50 text-sm font-bold opacity-90">{t('subtitle')}</p>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-6 pb-40 -mt-6">
         {activeTab === 'lottery' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Main Control Card */}
-            <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 space-y-10">
-              
+            <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 space-y-8">
+              {/* Location Section */}
+              <section>
+                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">📍 {t('location')}</h3>
+                <div className="relative mb-4">
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('searchPlace')}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-12 py-5 text-sm text-slate-800 focus:outline-none focus:border-orange-500 transition-all"
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(LOCATIONS[region] as any[]).map(l => (
+                    <button 
+                      key={l.name}
+                      onClick={() => setSearchQuery(l.name)}
+                      className={`px-4 py-2 rounded-full text-[10px] font-black transition-all border ${searchQuery === l.name ? 'bg-orange-500 text-white border-orange-400' : 'bg-slate-50 text-slate-400 border-slate-100'}`}
+                    >
+                      + {l.name}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <div className="h-px bg-slate-100" />
+
               {/* Cuisine Section */}
               <section>
-                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">
-                  1. {t('cuisine')}
-                </h3>
+                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">1. {t('cuisine')}</h3>
                 <div className="flex flex-wrap gap-3">
                   {displayedCuisines.map(c => (
                     <button 
                       key={c.id}
                       onClick={() => setSelectedCuisine(c.id)}
-                      className={`flex items-center gap-2 px-5 py-3 rounded-full border text-sm font-black transition-all duration-300 ${
-                        selectedCuisine === c.id 
-                          ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
-                          : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100'
-                      }`}
+                      className={`flex items-center gap-2 px-5 py-3 rounded-full border text-sm font-black transition-all duration-300 ${selectedCuisine === c.id ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100'}`}
                     >
                       <span>{c.icon}</span>
                       <span>{c.name}</span>
                     </button>
                   ))}
                 </div>
-                <button 
-                  onClick={() => setIsCuisineExpanded(!isCuisineExpanded)}
-                  className="w-full mt-8 text-orange-500 text-sm font-black flex items-center justify-center gap-2 hover:opacity-80 transition-opacity"
-                >
-                  {isCuisineExpanded ? t('hide') : t('showAll')}
-                </button>
+                <button onClick={() => setIsCuisineExpanded(!isCuisineExpanded)} className="w-full mt-8 text-orange-500 text-sm font-black flex items-center justify-center gap-2">{isCuisineExpanded ? t('hide') : t('showAll')}</button>
               </section>
 
               <div className="h-px bg-slate-100" />
 
               {/* Distance Section */}
               <section>
-                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">
-                  2. {t('distance')}
-                </h3>
+                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">2. {t('distance')}</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[500, 1000, 2000].map(d => (
                     <button 
                       key={d}
                       onClick={() => setDistance(d)}
-                      className={`py-4 rounded-2xl text-xs font-black transition-all border ${
-                        distance === d 
-                          ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
-                          : 'bg-slate-50 text-slate-500 border-slate-100'
-                      }`}
+                      className={`py-4 rounded-2xl text-xs font-black transition-all border ${distance === d ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' : 'bg-slate-50 text-slate-500 border-slate-100'}`}
                     >
                       {d}米內
                     </button>
@@ -437,77 +319,41 @@ export default function App() {
               </section>
             </div>
 
-            {/* Draw Button */}
-            <div className="relative pt-4">
-              <button 
-                onClick={handleLottery}
-                disabled={loading}
-                className={`w-full py-8 rounded-[2.5rem] font-black text-xl transition-all duration-500 shadow-2xl relative overflow-hidden group ${
-                  loading 
-                    ? 'bg-slate-100 text-orange-500 cursor-wait' 
-                    : 'bg-gradient-to-br from-orange-500 via-orange-500 to-red-600 text-white hover:scale-[1.02] active:scale-95'
-                }`}
-              >
-                {loading ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="text-4xl animate-bounce">🎰</div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] animate-pulse">
-                      {slotText}
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="flex items-center justify-center gap-3">
-                      <span className="text-2xl drop-shadow-lg">📍</span>
-                      <span className="uppercase tracking-widest">{t('draw')}</span>
-                    </span>
-                  </>
-                )}
-              </button>
-            </div>
+            <button 
+              onClick={handleLottery}
+              disabled={loading}
+              className={`w-full py-8 rounded-[2.5rem] font-black text-xl transition-all duration-500 shadow-2xl relative overflow-hidden group ${loading ? 'bg-slate-100 text-orange-500' : 'bg-gradient-to-br from-orange-500 via-orange-500 to-red-600 text-white hover:scale-[1.02] active:scale-95'}`}
+            >
+              {loading ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-4xl animate-bounce">🎰</div>
+                  <div className="text-[10px] uppercase tracking-[0.2em]">{slotText}</div>
+                </div>
+              ) : (
+                <span className="flex items-center justify-center gap-3">
+                  <span className="text-2xl">📍</span>
+                  <span className="uppercase tracking-widest">{t('draw')}</span>
+                </span>
+              )}
+            </button>
 
-            {/* Result Section */}
             {result && (
               <div className="animate-in zoom-in-95 fade-in duration-500 pt-10">
                 {result.error ? (
                   <div className="bg-white border border-slate-200 rounded-[2.5rem] p-12 text-center shadow-lg">
                     <div className="text-4xl mb-6">🍽️</div>
-                    <p className="text-slate-500 text-sm mb-6 font-medium leading-relaxed">{t('noResults')}</p>
-                    <button 
-                      onClick={() => setDistance(2000)}
-                      className="text-orange-500 text-[10px] font-black uppercase tracking-widest hover:underline"
-                    >
-                      {t('increaseRange')}
-                    </button>
+                    <p className="text-slate-500 text-sm mb-6">{t('noResults')}</p>
+                    <button onClick={() => setDistance(2000)} className="text-orange-500 text-[10px] font-black uppercase tracking-widest">{t('increaseRange')}</button>
                   </div>
                 ) : (
                   <>
-                    <RestaurantCard 
-                      res={result} 
-                      isMain={true} 
-                      favorites={favorites} 
-                      onToggleFavorite={toggleFavorite} 
-                      onShare={shareCard}
-                      reviews={userReviews}
-                      onAddReview={addReview}
-                      t={t}
-                    />
-                    
+                    <RestaurantCard res={result} isMain={true} favorites={favorites} onToggleFavorite={toggleFavorite} onShare={shareCard} reviews={userReviews} onAddReview={addReview} t={t} />
                     {result.alternatives && result.alternatives.length > 0 && (
                       <div className="mt-12 space-y-6 pb-10">
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 px-4">
-                          🍱 {t('alternatives')}
-                        </h3>
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 px-4">🍱 {t('alternatives')}</h3>
                         <div className="space-y-4">
                           {(result.alternatives as any[]).map((alt: any) => (
-                            <RestaurantCard 
-                              key={alt.name} 
-                              res={alt} 
-                              favorites={favorites} 
-                              onToggleFavorite={toggleFavorite} 
-                              t={t}
-                            />
+                            <RestaurantCard key={alt.name} res={alt} favorites={favorites} onToggleFavorite={toggleFavorite} t={t} />
                           ))}
                         </div>
                       </div>
@@ -520,123 +366,57 @@ export default function App() {
         )}
 
         {activeTab === 'favorites' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 min-h-[400px]">
-                <h2 className="text-3xl font-black text-slate-800 mb-8 tracking-tight">{t('favorites')}</h2>
-                {favorites.length === 0 ? (
-                  <div className="py-20 text-center">
-                    <div className="text-5xl mb-6 opacity-20">🍱</div>
-                    <p className="text-slate-400 text-sm font-medium">{t('noFavorites')}</p>
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 min-h-[400px]">
+            <h2 className="text-3xl font-black text-slate-800 mb-8">{t('favorites')}</h2>
+            {favorites.length === 0 ? (
+              <div className="py-20 text-center text-slate-400 font-medium">🍱 {t('noFavorites')}</div>
+            ) : (
+              <div className="space-y-4">
+                {favorites.map((fav: any) => (
+                  <div key={fav.name} className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 flex items-center gap-6">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-black text-slate-700">{fav.name}</h3>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase">📍 {fav.district || 'HK'}</p>
+                    </div>
+                    <button onClick={() => toggleFavorite(fav)} className="p-3 bg-white text-orange-500 rounded-2xl border border-slate-100 text-lg">❤️</button>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {favorites.map((fav: any) => (
-                      <div key={fav.name} className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 flex items-center gap-6 group">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-black text-slate-700 mb-1 group-hover:text-orange-500 transition-colors">{fav.name}</h3>
-                          <p className="text-slate-400 text-[10px] flex items-center gap-2 font-bold uppercase tracking-wider">
-                            📍 {fav.district || 'HK'}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <a href={fav.gmapsUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-white text-slate-400 rounded-2xl hover:text-orange-500 transition-all border border-slate-100 shadow-sm">🗺️</a>
-                          <button 
-                            onClick={() => toggleFavorite(fav)}
-                            className="p-3 bg-white text-orange-500 rounded-2xl hover:scale-110 transition-all border border-slate-100 shadow-sm text-lg"
-                          >
-                            ❤️
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-             </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 min-h-[400px]">
-                <h2 className="text-3xl font-black text-slate-800 mb-8 tracking-tight">{t('settings')}</h2>
-                
-                <div className="space-y-10">
-                  <section>
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('region')}</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button 
-                        onClick={() => setRegion('hk')}
-                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                          region === 'hk' 
-                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
-                            : 'bg-slate-50 text-slate-400 border-slate-100'
-                        }`}
-                      >
-                        Hong Kong 🇭🇰
-                      </button>
-                      <button 
-                        onClick={() => setRegion('tw')}
-                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                          region === 'tw' 
-                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
-                            : 'bg-slate-50 text-slate-400 border-slate-100'
-                        }`}
-                      >
-                        Taiwan 🇹🇼
-                      </button>
-                    </div>
-                  </section>
-
-                  <section>
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('langSelect')}</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button 
-                        onClick={() => setLang('zh')}
-                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                          lang === 'zh' 
-                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
-                            : 'bg-slate-50 text-slate-400 border-slate-100'
-                        }`}
-                      >
-                        繁體中文
-                      </button>
-                      <button 
-                        onClick={() => setLang('en')}
-                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                          lang === 'en' 
-                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
-                            : 'bg-slate-50 text-slate-400 border-slate-100'
-                        }`}
-                      >
-                        English
-                      </button>
-                    </div>
-                  </section>
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 min-h-[400px]">
+            <h2 className="text-3xl font-black text-slate-800 mb-8">{t('settings')}</h2>
+            <div className="space-y-10">
+              <section>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('region')}</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setRegion('hk')} className={`py-5 rounded-[2rem] text-xs font-black transition-all border ${region === 'hk' ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>Hong Kong 🇭🇰</button>
+                  <button onClick={() => setRegion('tw')} className={`py-5 rounded-[2rem] text-xs font-black transition-all border ${region === 'tw' ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>Taiwan 🇹🇼</button>
                 </div>
-             </div>
+              </section>
+              <section>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('langSelect')}</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setLang('zh')} className={`py-5 rounded-[2rem] text-xs font-black border ${lang === 'zh' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>繁體中文</button>
+                  <button onClick={() => setLang('en')} className={`py-5 rounded-[2rem] text-xs font-black border ${lang === 'en' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>English</button>
+                </div>
+              </section>
+            </div>
           </div>
         )}
       </main>
 
-      {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-50 flex items-center justify-around h-24 pb-6">
         {[
           { id: 'lottery', icon: '🎲', label: t('lottery') },
           { id: 'favorites', icon: '❤️', label: t('favorites') },
           { id: 'settings', icon: '⚙️', label: t('settings') }
         ].map(item => (
-          <button 
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`relative flex flex-col items-center gap-1.5 px-8 h-full justify-center transition-all ${
-              activeTab === item.id 
-                ? 'text-orange-500' 
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            {activeTab === item.id && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-500 rounded-b-full shadow-[0_4px_12px_rgba(59,130,246,0.5)]" />
-            )}
+          <button key={item.id} onClick={() => setActiveTab(item.id)} className={`relative flex flex-col items-center gap-1.5 px-8 h-full justify-center transition-all ${activeTab === item.id ? 'text-orange-500' : 'text-slate-400 hover:text-slate-600'}`}>
+            {activeTab === item.id && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-500 rounded-b-full shadow-[0_4px_12px_rgba(59,130,246,0.5)]" />}
             <span className="text-2xl">{item.icon}</span>
             <span className="text-[10px] font-black uppercase tracking-wider">{item.label}</span>
           </button>
