@@ -1,14 +1,11 @@
 // Foursquare Places API handler
 export default async function handler(req, res) {
-  const { lat, lng, category = 'all', open_now = 'false' } = req.query;
+  const { lat, lng, category = 'all', open_now = 'false', location_query } = req.query;
 
-  if (!lat || !lng) {
+  // Require either coordinates or a text location query
+  if (!location_query && (!lat || !lng)) {
     return res.status(400).json({ error: 'Missing location parameters' });
   }
-
-  const userLat = parseFloat(lat);
-  const userLng = parseFloat(lng);
-  const searchRadius = 1500; // Fixed 1500m radius
 
   // Map our cuisine categories to Foursquare categories
   const categoryMap = {
@@ -35,16 +32,26 @@ export default async function handler(req, res) {
   try {
     // Foursquare Places API v3 - Search endpoint
     const apiKey = process.env.FOURSQUARE_API_KEY;
-
     if (!apiKey) {
       return res.status(500).json({ error: 'Foursquare API key not configured' });
     }
 
     const params = new URLSearchParams({
-      ll: `${userLat},${userLng}`,
-      radius: searchRadius.toString(),
       limit: '50', // Get more results to filter from
     });
+
+    if (location_query) {
+      // Text-based location search using 'near' parameter
+      params.append('near', location_query);
+      params.append('query', 'restaurant');
+    } else {
+      // Coordinate-based search
+      const userLat = parseFloat(lat);
+      const userLng = parseFloat(lng);
+      const searchRadius = 1500; // Fixed 1500m radius
+      params.append('ll', `${userLat},${userLng}`);
+      params.append('radius', searchRadius.toString());
+    }
 
     if (foursquareCategory) {
       params.append('categories', foursquareCategory);
@@ -86,18 +93,21 @@ export default async function handler(req, res) {
     const randomIndex = Math.floor(Math.random() * Math.min(data.results.length, 10));
     const place = data.results[randomIndex];
 
+    // Format a place object
+    const formatPlace = (p) => ({
+      name: p.name,
+      address: p.location?.formatted_address || p.location?.address || 'Address unavailable',
+      district: p.location?.locality || p.location?.region || 'Area',
+      rating: (p.rating ? p.rating.toFixed(1) : null),
+      openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(p.name)}`,
+      gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + ' ' + (p.location?.address || ''))}`
+    });
+
     // Get alternatives (next 3 restaurants)
     const alternatives = data.results
       .filter((p, idx) => idx !== randomIndex)
       .slice(0, 3)
-      .map(p => ({
-        name: p.name,
-        address: p.location?.formatted_address || p.location?.address || 'Address unavailable',
-        district: p.location?.locality || 'HK',
-        rating: (p.rating ? p.rating.toFixed(1) : null),
-        openriceUrl: `https://www.openrice.com/zh/hongkong/restaurants?what=${encodeURIComponent(p.name)}`,
-        gmapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + ' ' + (p.location?.address || ''))}`
-      }));
+      .map(formatPlace);
 
     const restaurant = {
       name: place.name,
