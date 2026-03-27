@@ -2,22 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 
 // --- Utilities & Constants ---
 const CUISINES = [
-  { id: 'all', name: '隨便', icon: '🍱' },
-  { id: 'cha-chaan-teng', name: '茶餐廳', icon: '☕' },
-  { id: 'cafe', name: 'Cafe', icon: '🍰' },
-  { id: 'japanese', name: '日本菜', icon: '🍣' },
-  { id: 'korean', name: '韓國菜', icon: '🍗' },
-  { id: 'chinese', name: '中菜', icon: '🥟' },
-  { id: 'western', name: '西餐', icon: '🥩' },
-  { id: 'thai', name: '泰國菜', icon: '🍲' },
-  { id: 'vietnamese', name: '越南菜', icon: '🍜' },
-  { id: 'fast-food', name: '快餐', icon: '🍔' },
+  { id: 'all', name: '全部都殺', icon: '🎲' },
+  { id: 'cafe', name: 'Cafe', icon: '☕' },
+  { id: 'cha-chaan-teng', name: '港式茶餐廳', icon: '🧋' },
+  { id: 'japanese', name: '日本嘢', icon: '🍣' },
+  { id: 'thai', name: '泰國菜', icon: '🌶️' },
+  { id: 'korean', name: '韓國菜', icon: '🥩' },
+  { id: 'burger', name: '漢堡包', icon: '🍔' },
+  { id: 'italian', name: '意大利菜', icon: '🍕' },
   { id: 'hotpot', name: '火鍋', icon: '🍲' },
-  { id: 'dessert', name: '甜品', icon: '🍧' },
-  { id: 'noodles', name: '粉麵', icon: '🍜' },
-  { id: 'bbq', name: '燒烤', icon: '🔥' },
-  { id: 'vegetarian', name: '素食', icon: '🥬' },
-  { id: 'street-food', name: '小食', icon: '🍡' },
+  { id: 'vietnamese', name: '越南粉', icon: '🥢' },
+  { id: 'dimsum', name: '點心', icon: '🥟' },
+  { id: 'rice', name: '兩餸飯', icon: '🍱' },
+  { id: 'fast-food', name: '快餐', icon: '🍟' },
 ];
 
 const LOCATIONS: Record<string, any[]> = {
@@ -40,21 +37,22 @@ const LOCATIONS: Record<string, any[]> = {
 
 const TRANSLATIONS: any = {
   zh: {
-    title: '🎰 搵食盲盒',
+    title: '搵食盲盒',
+    subtitle: '唔知食咩好？一掣幫你決定命運！',
     draw: '撳我抽盲盒！',
-    cuisine: '菜式類型',
-    distance: '距離',
+    cuisine: '想食咩?',
+    distance: '行幾遠?',
     rating: '最低評分',
     openNow: '營業中',
     favorites: '收藏庫',
     settings: '設定',
-    lottery: '抽獎',
+    lottery: '抽盲盒',
     reviews: '評論',
     noFavorites: '仲未有收藏喎',
     address: '地址',
     openrice: '睇 OpenRice',
     gmaps: '開 Google Maps',
-    any: '隨便',
+    any: '全部都殺',
     loading: '搜尋中...',
     share: '分享卡片',
     alternatives: '附近仲有...',
@@ -64,8 +62,8 @@ const TRANSLATIONS: any = {
     searchPlace: '輸入地點（如：旺角）',
     region: '選擇地區',
     suggested: '熱門地點',
-    hide: '收埋',
-    showAll: '顯示全部',
+    hide: '摺埋選項 ▲',
+    showAll: '顯示更多 ▼',
     searchFailed: '搜尋失敗，請再試一次',
     copied: '已複製分享文字！',
     increaseRange: '加大搜尋範圍',
@@ -79,10 +77,11 @@ const TRANSLATIONS: any = {
     slot5: '尋找最佳食評中...',
   },
   en: {
-    title: '🎰 Food Lottery',
+    title: 'Food Lottery',
+    subtitle: "Don't know what to eat? One click decides your fate!",
     draw: 'Draw Now!',
-    cuisine: 'Cuisine',
-    distance: 'Distance',
+    cuisine: 'What to eat?',
+    distance: 'How far?',
     rating: 'Min Rating',
     openNow: 'Open Now',
     favorites: 'Favorites',
@@ -93,7 +92,7 @@ const TRANSLATIONS: any = {
     address: 'Address',
     openrice: 'OpenRice',
     gmaps: 'Google Maps',
-    any: 'Any',
+    any: 'Everything',
     loading: 'Searching...',
     share: 'Share Card',
     alternatives: 'Others Nearby...',
@@ -103,8 +102,8 @@ const TRANSLATIONS: any = {
     searchPlace: 'Enter location (e.g. Mong Kok)',
     region: 'Select Region',
     suggested: 'Suggested Locations',
-    hide: 'Hide',
-    showAll: 'Show All',
+    hide: 'Hide Options ▲',
+    showAll: 'Show More ▼',
     searchFailed: 'Search failed, please try again',
     copied: 'Share text copied!',
     increaseRange: 'Increase search range',
@@ -129,27 +128,27 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
   const isFavorite = favorites.some((f: any) => f.name === res.name);
 
   return (
-    <div className={`bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 transition-all duration-500 hover:border-blue-500/30 ${isMain ? 'shadow-2xl shadow-blue-900/20 active:scale-[0.99]' : ''}`}>
+    <div className={`bg-white border border-slate-200 rounded-[2.5rem] p-8 transition-all duration-500 hover:shadow-xl ${isMain ? 'shadow-2xl active:scale-[0.99]' : ''}`}>
       <div className="flex justify-between items-start mb-6">
         <div className="flex-1">
-          <h3 className="text-2xl font-black text-white mb-2 tracking-tight">{res.name}</h3>
+          <h3 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">{res.name}</h3>
           <p className="text-slate-500 text-xs flex items-center gap-2">
-            <span className="text-blue-400">📍</span> {res.address}
+            <span className="text-orange-500">📍</span> {res.address}
           </p>
         </div>
         <button 
           onClick={() => onToggleFavorite(res)}
-          className="text-2xl p-4 rounded-[1.5rem] bg-slate-900/50 hover:bg-slate-700/50 transition-all duration-300 active:scale-75 border border-white/5"
+          className="text-2xl p-4 rounded-[1.5rem] bg-slate-50 hover:bg-slate-100 transition-all duration-300 active:scale-75 border border-slate-200"
         >
           {isFavorite ? '❤️' : '🤍'}
         </button>
       </div>
 
       <div className="flex gap-4 mb-8">
-        <div className="bg-green-500/10 text-green-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-green-500/20">
+        <div className="bg-green-500/10 text-green-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-green-200">
           🟢 {t('openNow')}
         </div>
-        <div className="bg-amber-500/10 text-amber-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
+        <div className="bg-amber-500/10 text-amber-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-200">
           ⭐ {res.rating || '4.2'}
         </div>
       </div>
@@ -159,7 +158,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           href={res.openriceUrl} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 bg-slate-900/50 hover:bg-slate-800 text-slate-300 py-4 rounded-2xl text-[10px] font-black transition-all border border-white/5 uppercase tracking-widest"
+          className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-4 rounded-2xl text-[10px] font-black transition-all border border-slate-200 uppercase tracking-widest"
         >
           🥡 {t('openrice')}
         </a>
@@ -167,7 +166,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
           href={res.gmapsUrl} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 bg-slate-900/50 hover:bg-slate-800 text-slate-300 py-4 rounded-2xl text-[10px] font-black transition-all border border-white/5 uppercase tracking-widest"
+          className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-4 rounded-2xl text-[10px] font-black transition-all border border-slate-200 uppercase tracking-widest"
         >
           🗺️ {t('gmaps')}
         </a>
@@ -177,25 +176,25 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
         <div className="space-y-6">
           <button 
             onClick={() => onShare(res)}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-5 rounded-2xl font-black text-xs transition-all shadow-2xl shadow-blue-900/40 uppercase tracking-[0.2em] border border-white/10 active:scale-[0.98]"
+            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white py-5 rounded-2xl font-black text-xs transition-all shadow-xl shadow-orange-200 uppercase tracking-[0.2em] active:scale-[0.98]"
           >
             {t('share')}
           </button>
 
-          <div className="pt-6 border-t border-white/5">
-            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
+          <div className="pt-6 border-t border-slate-100">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
               <span>{t('reviews')}</span>
-              <span className="bg-slate-800 px-2 py-0.5 rounded-md text-slate-400">{(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length}</span>
+              <span className="bg-slate-100 px-2 py-0.5 rounded-md text-slate-500">{(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length}</span>
             </h4>
             
             <div className="space-y-3 mb-6 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
               {(reviews as any[]).filter((r: any) => r.restaurantName === res.name).length === 0 ? (
-                <div className="text-slate-600 text-[10px] py-4 text-center italic">{t('noReviews')}</div>
+                <div className="text-slate-400 text-[10px] py-4 text-center italic">{t('noReviews')}</div>
               ) : (
                 (reviews as any[]).filter((r: any) => r.restaurantName === res.name).map((r: any) => (
-                  <div key={r.id} className="bg-slate-900/30 p-4 rounded-2xl border border-white/5">
-                    <p className="text-slate-300 text-xs leading-relaxed">{r.content}</p>
-                    <span className="text-[8px] text-slate-600 mt-2 block font-bold">{r.date}</span>
+                  <div key={r.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-slate-600 text-xs leading-relaxed">{r.content}</p>
+                    <span className="text-[8px] text-slate-400 mt-2 block font-bold">{r.date}</span>
                   </div>
                 ))
               )}
@@ -207,7 +206,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
                 value={newReview}
                 onChange={(e) => setNewReview(e.target.value)}
                 placeholder={t('writeReview')}
-                className="flex-1 bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-orange-500/50 transition-all focus:ring-4 focus:ring-orange-500/10"
               />
               <button 
                 onClick={() => {
@@ -216,7 +215,7 @@ const RestaurantCard = ({ res, isMain = false, favorites = [], onToggleFavorite,
                     setNewReview('');
                   }
                 }}
-                className="bg-blue-600 hover:bg-blue-500 text-white w-14 rounded-2xl transition-all shadow-lg active:scale-90 flex items-center justify-center border border-white/10"
+                className="bg-orange-500 hover:bg-orange-400 text-white w-14 rounded-2xl transition-all shadow-lg active:scale-90 flex items-center justify-center"
               >
                 🚀
               </button>
@@ -252,7 +251,7 @@ export default function App() {
     }
   });
   const [selectedCuisine, setSelectedCuisine] = useState('all');
-  const [distance, setDistance] = useState(800);
+  const [distance, setDistance] = useState(1000);
   const [openNow, setOpenNow] = useState(true);
   const [isCuisineExpanded, setIsCuisineExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -302,16 +301,6 @@ export default function App() {
       } else if (currentCoords) {
         lat = currentCoords.lat;
         lng = currentCoords.lng;
-      } else {
-        try {
-          const pos: any = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          });
-          lat = pos.coords.latitude;
-          lng = pos.coords.longitude;
-        } catch (e) {
-          console.log('Using default Mong Kok coordinates');
-        }
       }
 
       const params = new URLSearchParams({
@@ -374,138 +363,95 @@ export default function App() {
     setUserReviews((prev: any[]) => [review, ...prev]);
   };
 
-  const displayedCuisines = isCuisineExpanded ? CUISINES : CUISINES.slice(0, 6);
+  const displayedCuisines = isCuisineExpanded ? CUISINES : CUISINES.slice(0, 10);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans">
       {/* Header */}
-      <header className="p-8 pt-12 text-center relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-blue-600/10 blur-[120px] rounded-full -z-10" />
-        <div className="inline-block mb-6 relative">
-          <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl rotate-12 shadow-2xl shadow-blue-900/40 flex items-center justify-center border border-white/20">
-            <img src={logoUrl} alt="Logo" className="w-12 h-12 -rotate-12 object-contain" />
-          </div>
-        </div>
-        <h1 className="text-4xl font-black text-white mb-2 tracking-tight">{t('title')}</h1>
-        <div className="inline-flex items-center gap-2 bg-blue-500/10 px-4 py-1 rounded-full border border-blue-500/20">
-          <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">VER 2.1</span>
+      <header className="bg-orange-500 p-8 pb-12 text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-white/5 skew-y-6 transform translate-y-12" />
+        <div className="relative flex flex-col items-center gap-4">
+           <div className="text-5xl drop-shadow-lg">🎲</div>
+           <h1 className="text-4xl font-black text-white tracking-tight">{t('title')}</h1>
+           <p className="text-orange-50 text-sm font-bold opacity-90">{t('subtitle')}</p>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-6 pb-40">
+      <main className="max-w-md mx-auto px-6 pb-40 -mt-6">
         {activeTab === 'lottery' && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Manual Search Section */}
-            <section>
-              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                <span className="text-blue-400">📍</span> {t('searchPlace')}
-                <span className="ml-auto bg-slate-800 px-2 py-0.5 rounded text-blue-400">{region.toUpperCase()}</span>
-              </h3>
-              <div className="relative group">
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('searchPlace')}
-                  className="w-full bg-slate-900/80 border border-slate-700/50 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all focus:ring-4 focus:ring-blue-500/10"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">✕</button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <span className="text-[9px] text-slate-600 font-bold uppercase py-1.5">{t('suggested')}:</span>
-                {(LOCATIONS[region] as any[]).slice(0, 4).map((loc: any) => (
-                  <button 
-                    key={loc.name}
-                    onClick={() => setSearchQuery(loc.name)}
-                    className="bg-slate-900/50 hover:bg-slate-700/50 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border border-white/5"
-                  >
-                    + {loc.name}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Cuisine Section */}
-            <section>
-              <div className="flex justify-between items-end mb-4">
-                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <span className="text-blue-400">🍱</span> {t('cuisine')}
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Main Control Card */}
+            <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 space-y-10">
+              
+              {/* Cuisine Section */}
+              <section>
+                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">
+                  1. {t('cuisine')}
                 </h3>
+                <div className="flex flex-wrap gap-3">
+                  {displayedCuisines.map(c => (
+                    <button 
+                      key={c.id}
+                      onClick={() => setSelectedCuisine(c.id)}
+                      className={`flex items-center gap-2 px-5 py-3 rounded-full border text-sm font-black transition-all duration-300 ${
+                        selectedCuisine === c.id 
+                          ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
+                          : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>{c.icon}</span>
+                      <span>{c.name}</span>
+                    </button>
+                  ))}
+                </div>
                 <button 
                   onClick={() => setIsCuisineExpanded(!isCuisineExpanded)}
-                  className="text-blue-400 text-[9px] font-black hover:text-blue-300 bg-blue-500/10 px-4 py-1.5 rounded-full uppercase tracking-widest transition-all"
+                  className="w-full mt-8 text-orange-500 text-sm font-black flex items-center justify-center gap-2 hover:opacity-80 transition-opacity"
                 >
                   {isCuisineExpanded ? t('hide') : t('showAll')}
                 </button>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {displayedCuisines.map(c => (
-                  <button 
-                    key={c.id}
-                    onClick={() => setSelectedCuisine(c.id)}
-                    className={`flex flex-col items-center p-4 rounded-3xl border transition-all duration-300 active:scale-90 ${
-                      selectedCuisine === c.id 
-                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40' 
-                        : 'bg-slate-900/50 border-white/5 text-slate-400'
-                    }`}
-                  >
-                    <span className="text-2xl mb-2">{c.icon}</span>
-                    <span className="text-[10px] font-black uppercase tracking-wider">{c.name}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
+              </section>
 
-            {/* Controls Section */}
-            <section className="bg-slate-900/40 p-6 rounded-[2rem] border border-white/5 space-y-8">
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <span className="text-blue-400">📏</span> {t('distance')}
-                  </h3>
-                  <span className="text-blue-400 text-xs font-black">{distance}m</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="200" 
-                  max="2000" 
-                  step="100" 
-                  value={distance}
-                  onChange={(e) => setDistance(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <span className="text-blue-400">🕒</span> {t('openNow')}
+              <div className="h-px bg-slate-100" />
+
+              {/* Distance Section */}
+              <section>
+                <h3 className="text-lg font-black text-slate-600 mb-6 flex items-center gap-3">
+                  2. {t('distance')}
                 </h3>
-                <button 
-                  onClick={() => setOpenNow(!openNow)}
-                  className={`w-14 h-7 rounded-full transition-all duration-300 relative border border-white/10 ${openNow ? 'bg-blue-600' : 'bg-slate-900'}`}
-                >
-                  <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all duration-300 shadow-lg ${openNow ? 'left-8' : 'left-1'}`} />
-                </button>
-              </div>
-            </section>
+                <div className="grid grid-cols-3 gap-3">
+                  {[500, 1000, 2000].map(d => (
+                    <button 
+                      key={d}
+                      onClick={() => setDistance(d)}
+                      className={`py-4 rounded-2xl text-xs font-black transition-all border ${
+                        distance === d 
+                          ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
+                          : 'bg-slate-50 text-slate-500 border-slate-100'
+                      }`}
+                    >
+                      {d}米內
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
 
             {/* Draw Button */}
             <div className="relative pt-4">
               <button 
                 onClick={handleLottery}
                 disabled={loading}
-                className={`w-full py-8 rounded-[2.5rem] font-black text-lg transition-all duration-500 shadow-2xl relative overflow-hidden group ${
+                className={`w-full py-8 rounded-[2.5rem] font-black text-xl transition-all duration-500 shadow-2xl relative overflow-hidden group ${
                   loading 
-                    ? 'bg-slate-900 text-blue-400 cursor-wait' 
-                    : 'bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white hover:scale-[1.02] active:scale-95'
+                    ? 'bg-slate-100 text-orange-500 cursor-wait' 
+                    : 'bg-gradient-to-br from-orange-500 via-orange-500 to-red-600 text-white hover:scale-[1.02] active:scale-95'
                 }`}
               >
                 {loading ? (
                   <div className="flex flex-col items-center gap-2">
-                    <div className="text-4xl animate-bounce mb-2">🎰</div>
-                    <div className="text-blue-400 font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">
+                    <div className="text-4xl animate-bounce">🎰</div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] animate-pulse">
                       {slotText}
                     </div>
                   </div>
@@ -513,8 +459,8 @@ export default function App() {
                   <>
                     <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <span className="flex items-center justify-center gap-3">
-                      <span className="text-2xl animate-spin-slow">🎯</span>
-                      <span className="uppercase tracking-[0.2em]">{t('draw')}</span>
+                      <span className="text-2xl drop-shadow-lg">📍</span>
+                      <span className="uppercase tracking-widest">{t('draw')}</span>
                     </span>
                   </>
                 )}
@@ -523,14 +469,14 @@ export default function App() {
 
             {/* Result Section */}
             {result && (
-              <div className="animate-in zoom-in-95 fade-in duration-500">
+              <div className="animate-in zoom-in-95 fade-in duration-500 pt-10">
                 {result.error ? (
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-[2.5rem] p-12 text-center">
+                  <div className="bg-white border border-slate-200 rounded-[2.5rem] p-12 text-center shadow-lg">
                     <div className="text-4xl mb-6">🍽️</div>
-                    <p className="text-slate-400 text-sm mb-6 font-medium leading-relaxed">{t('noResults')}</p>
+                    <p className="text-slate-500 text-sm mb-6 font-medium leading-relaxed">{t('noResults')}</p>
                     <button 
                       onClick={() => setDistance(2000)}
-                      className="text-red-400 text-[10px] font-black uppercase tracking-widest hover:underline"
+                      className="text-orange-500 text-[10px] font-black uppercase tracking-widest hover:underline"
                     >
                       {t('increaseRange')}
                     </button>
@@ -549,9 +495,9 @@ export default function App() {
                     />
                     
                     {result.alternatives && result.alternatives.length > 0 && (
-                      <div className="mt-12 space-y-6">
-                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 px-4">
-                          <span className="text-blue-400">🍱</span> {t('alternatives')}
+                      <div className="mt-12 space-y-6 pb-10">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 px-4">
+                          🍱 {t('alternatives')}
                         </h3>
                         <div className="space-y-4">
                           {(result.alternatives as any[]).map((alt: any) => (
@@ -570,132 +516,129 @@ export default function App() {
                 )}
               </div>
             )}
-            
-            {/* Results Not Yet Out Fallback */}
-            {!result && !loading && (
-              <div className="text-center py-12 opacity-30">
-                <div className="text-4xl mb-4 grayscale">🍱</div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                  {t('resultsNotOut')}
-                </p>
-              </div>
-            )}
           </div>
         )}
 
         {activeTab === 'favorites' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h2 className="text-3xl font-black text-white mb-8 tracking-tight">{t('favorites')}</h2>
-            {favorites.length === 0 ? (
-              <div className="bg-slate-900/40 rounded-[2.5rem] p-20 text-center border border-white/5">
-                <div className="text-5xl mb-6 grayscale">🍱</div>
-                <p className="text-slate-500 text-sm font-medium">{t('noFavorites')}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {favorites.map((fav: any) => (
-                  <div key={fav.name} className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 flex items-center gap-6 group">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-black text-white mb-1 group-hover:text-blue-400 transition-colors">{fav.name}</h3>
-                      <p className="text-slate-500 text-[10px] flex items-center gap-2 font-bold uppercase tracking-wider">
-                        <span className="text-blue-400">📍</span> {fav.district || 'HK'}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <a href={fav.gmapsUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-slate-900 text-slate-400 rounded-2xl hover:text-white transition-all border border-white/5">🗺️</a>
-                      <button 
-                        onClick={() => toggleFavorite(fav)}
-                        className="p-3 bg-slate-900 text-blue-400 rounded-2xl hover:scale-110 transition-all border border-white/5 text-lg"
-                      >
-                        ❤️
-                      </button>
-                    </div>
+             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 min-h-[400px]">
+                <h2 className="text-3xl font-black text-slate-800 mb-8 tracking-tight">{t('favorites')}</h2>
+                {favorites.length === 0 ? (
+                  <div className="py-20 text-center">
+                    <div className="text-5xl mb-6 opacity-20">🍱</div>
+                    <p className="text-slate-400 text-sm font-medium">{t('noFavorites')}</p>
                   </div>
-                ))}
-              </div>
-            )}
+                ) : (
+                  <div className="space-y-4">
+                    {favorites.map((fav: any) => (
+                      <div key={fav.name} className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 flex items-center gap-6 group">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-black text-slate-700 mb-1 group-hover:text-orange-500 transition-colors">{fav.name}</h3>
+                          <p className="text-slate-400 text-[10px] flex items-center gap-2 font-bold uppercase tracking-wider">
+                            📍 {fav.district || 'HK'}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <a href={fav.gmapsUrl} target="_blank" rel="noopener noreferrer" className="p-3 bg-white text-slate-400 rounded-2xl hover:text-orange-500 transition-all border border-slate-100 shadow-sm">🗺️</a>
+                          <button 
+                            onClick={() => toggleFavorite(fav)}
+                            className="p-3 bg-white text-orange-500 rounded-2xl hover:scale-110 transition-all border border-slate-100 shadow-sm text-lg"
+                          >
+                            ❤️
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+             </div>
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h2 className="text-3xl font-black text-white mb-8 tracking-tight">{t('settings')}</h2>
-            
-            <div className="space-y-8">
-              <section>
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">{t('region')}</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => setRegion('hk')}
-                    className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                      region === 'hk' 
-                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40' 
-                        : 'bg-slate-900/50 text-slate-500 border-white/5'
-                    }`}
-                  >
-                    Hong Kong 🇭🇰
-                  </button>
-                  <button 
-                    onClick={() => setRegion('tw')}
-                    className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                      region === 'tw' 
-                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40' 
-                        : 'bg-slate-900/50 text-slate-500 border-white/5'
-                    }`}
-                  >
-                    Taiwan 🇹🇼
-                  </button>
-                </div>
-              </section>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 min-h-[400px]">
+                <h2 className="text-3xl font-black text-slate-800 mb-8 tracking-tight">{t('settings')}</h2>
+                
+                <div className="space-y-10">
+                  <section>
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('region')}</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        onClick={() => setRegion('hk')}
+                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
+                          region === 'hk' 
+                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
+                            : 'bg-slate-50 text-slate-400 border-slate-100'
+                        }`}
+                      >
+                        Hong Kong 🇭🇰
+                      </button>
+                      <button 
+                        onClick={() => setRegion('tw')}
+                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
+                          region === 'tw' 
+                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
+                            : 'bg-slate-50 text-slate-400 border-slate-100'
+                        }`}
+                      >
+                        Taiwan 🇹🇼
+                      </button>
+                    </div>
+                  </section>
 
-              <section>
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">{t('langSelect')}</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => setLang('zh')}
-                    className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                      lang === 'zh' 
-                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40' 
-                        : 'bg-slate-900/50 text-slate-500 border-white/5'
-                    }`}
-                  >
-                    繁體中文
-                  </button>
-                  <button 
-                    onClick={() => setLang('en')}
-                    className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
-                      lang === 'en' 
-                        ? 'bg-blue-600 text-white border-blue-400 shadow-2xl shadow-blue-900/40' 
-                        : 'bg-slate-900/50 text-slate-500 border-white/5'
-                    }`}
-                  >
-                    English
-                  </button>
+                  <section>
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('langSelect')}</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        onClick={() => setLang('zh')}
+                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
+                          lang === 'zh' 
+                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
+                            : 'bg-slate-50 text-slate-400 border-slate-100'
+                        }`}
+                      >
+                        繁體中文
+                      </button>
+                      <button 
+                        onClick={() => setLang('en')}
+                        className={`py-5 rounded-[2rem] text-xs font-black transition-all uppercase tracking-widest border ${
+                          lang === 'en' 
+                            ? 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-200' 
+                            : 'bg-slate-50 text-slate-400 border-slate-100'
+                        }`}
+                      >
+                        English
+                      </button>
+                    </div>
+                  </section>
                 </div>
-              </section>
-            </div>
+             </div>
           </div>
         )}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-slate-900/60 border border-white/10 backdrop-blur-2xl rounded-[2.5rem] p-3 shadow-2xl z-50 flex items-center justify-around">
+      <nav className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-50 flex items-center justify-around h-24 pb-6">
         {[
-          { id: 'lottery', icon: '🎰', label: t('lottery') },
+          { id: 'lottery', icon: '🎲', label: t('lottery') },
           { id: 'favorites', icon: '❤️', label: t('favorites') },
           { id: 'settings', icon: '⚙️', label: t('settings') }
         ].map(item => (
           <button 
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`flex flex-col items-center gap-1.5 px-6 py-3 rounded-3xl transition-all ${
+            className={`relative flex flex-col items-center gap-1.5 px-8 h-full justify-center transition-all ${
               activeTab === item.id 
-                ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/40' 
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-orange-500' 
+                : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            <span className="text-lg">{item.icon}</span>
-            <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
+            {activeTab === item.id && (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-500 rounded-b-full shadow-[0_4px_12px_rgba(59,130,246,0.5)]" />
+            )}
+            <span className="text-2xl">{item.icon}</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">{item.label}</span>
           </button>
         ))}
       </nav>
